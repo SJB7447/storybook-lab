@@ -107,8 +107,8 @@
             </p>
           </div>
 
-          <!-- Seat & Name Picker -->
-          <div class="bg-white/95 text-slate-800 p-2.5 md:p-3 rounded-2xl shadow flex items-center gap-2.5 backdrop-blur-sm">
+          <!-- Seat & Name Picker with Backup/Restore buttons -->
+          <div class="flex flex-wrap items-center gap-2 bg-white/95 text-slate-800 p-2.5 md:p-3 rounded-2xl shadow backdrop-blur-sm">
             <div>
               <label class="block text-[10px] font-bold text-slate-500 mb-0.5">내 좌석 번호</label>
               <select id="student-seat-select" class="bg-amber-50 border border-amber-300 font-jua text-amber-700 text-base rounded-xl px-2 py-1 focus:ring-2 focus:ring-amber-400 outline-none cursor-pointer transition">
@@ -126,11 +126,19 @@
             </button>
             <div id="badge-name-locked" class="hidden text-[11px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-xl items-center gap-1.5 self-end mb-0.5">
               <i class="fa-solid fa-shield-halved text-amber-600"></i>
-              <span>확정됨 (수정은 선생님께 요청)</span>
+              <span>확정됨</span>
             </div>
-            <div class="text-[11px] text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-xl self-end mb-0.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-              연결됨
+
+            <!-- Real-time Auto-Save Status Badge for Personal Devices -->
+            <div class="flex items-center gap-1.5 self-end mb-0.5 pl-1.5 border-l border-slate-200">
+              <div id="badge-auto-save-status" class="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-1 rounded-xl shadow-sm transition-all" title="개인 기기(노트북/태블릿)에 한 글자마다 실시간으로 자동 보관됩니다">
+                <span id="dot-auto-save" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="auto-save-status-text">실시간 자동 저장 중</span>
+              </div>
+              <!-- Emergency Manual Backup (Minimal Icon Button) -->
+              <button id="btn-export-student-backup" type="button" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition" title="비상용 파일 다운로드">
+                <i class="fa-solid fa-download text-xs"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -414,7 +422,7 @@
         </div>
       </div>
 
-      <!-- Dynamic Weekly Submission Section (Adaptive to Week 1, Week 2~3, Week 4~5) -->
+      <!-- Dynamic Weekly Submission Section -->
       <div id="section-student-submission" class="bg-white rounded-3xl p-5 border-2 border-indigo-200 shadow-sm transition-all">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div class="flex items-center gap-2">
@@ -547,7 +555,7 @@
               </h2>
             </div>
             <p class="text-xs text-slate-500 mt-0.5">
-              아이들의 키보드 타이핑이 0.5초마다 실시간으로 업데이트됩니다. 카드를 누르면 빔프로젝터 스포트라이트가 열립니다.
+              아이들의 키보드 타이핑이 실시간으로 업데이트됩니다. 카드를 누르면 빔프로젝터 스포트라이트가 열립니다.
             </p>
           </div>
 
@@ -566,10 +574,22 @@
               과제제출: <strong id="count-done">0</strong>
             </div>
 
-            <!-- Drive Master Reception Shutter Toggle Button (NEW) -->
+            <!-- Drive Master Reception Shutter Toggle Button -->
             <button id="btn-toggle-drive-shutter" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs px-3 py-1.5 rounded-xl border border-emerald-300 font-bold transition flex items-center gap-1.5" title="수업 종료 후 버튼 하나로 구글 드라이브 외부 수신을 즉시 차단하거나 다시 엽니다">
               <span id="shutter-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span id="shutter-btn-label">드라이브 수신 활성(ON)</span>
+            </button>
+
+            <!-- Firebase Live Cloud Sync Settings Button (NEW for GitHub Pages) -->
+            <button id="btn-open-firebase-settings" class="bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs px-3 py-1.5 rounded-xl border border-amber-300 font-bold transition flex items-center gap-1" title="깃허브 배포 시 15대 서로 다른 기기 간 실시간 동기화 설정">
+              <i class="fa-solid fa-fire text-amber-500"></i>
+              <span>실시간 DB 연동</span>
+            </button>
+
+            <!-- Export All Backup Button for Teacher -->
+            <button id="btn-export-all-class" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-xl border border-slate-300 font-bold transition flex items-center gap-1" title="15명 전체 학생의 현재 작성 상태를 하나의 백업 파일로 저장합니다">
+              <i class="fa-solid fa-download text-indigo-600"></i>
+              <span>전체 반 백업</span>
             </button>
 
             <button id="btn-demo-fill" class="bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs px-3 py-1.5 rounded-xl border border-purple-300 font-bold transition flex items-center gap-1">
@@ -697,7 +717,7 @@
           </div>
         </div>
 
-        <!-- Weekly Submissions Viewer (Week 1, Week 2~3, Week 4~5) -->
+        <!-- Weekly Submissions Viewer -->
         <div class="border-t border-slate-100 pt-3 space-y-3">
           <h4 class="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
             <i class="fa-solid fa-folder-open"></i> 주차별 제출 작품 및 발표 자료
@@ -744,7 +764,7 @@
     </div>
   </div>
 
-  <!-- Teacher Authentication PIN Modal (Default PIN hint removed) -->
+  <!-- Teacher Authentication PIN Modal -->
   <div id="teacher-auth-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div id="teacher-auth-card" class="bg-white rounded-3xl max-w-sm w-full shadow-2xl border-4 border-amber-300 overflow-hidden transform transition-all p-6 text-center">
       <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 text-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
@@ -795,60 +815,62 @@
         </button>
       </div>
 
-      <div class="space-y-3.5 text-xs text-slate-600">
-        <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200">
-          <h4 class="font-bold text-emerald-900 mb-1 flex items-center gap-1">
-            <i class="fa-solid fa-circle-info text-emerald-600"></i> 자동 폴더 구조 및 셔터 제어 안내
-          </h4>
-          <p class="text-[11px] leading-relaxed text-emerald-800">
-            학생이 과제를 제출하면 선생님의 구글 드라이브에 아래 구조로 폴더가 즉시 자동 생성되고 파일 및 링크가 차곡차곡 저장됩니다. 수업이 끝나면 관제탑의 <strong>[드라이브 수신 스위치]</strong> 버튼을 한 번만 누르면 외부 수신이 즉시 차단됩니다:
-          </p>
-          <div class="mt-2 font-mono text-[11px] bg-white p-2.5 rounded-xl border border-emerald-200 text-slate-700 space-y-0.5">
-            <div>📁 화정도서관 AI 동화책 만들기</div>
-            <div class="pl-4">└── 📁 01번_김민우 작가/</div>
-            <div class="pl-8">├── 📁 1주차_주인공캐릭터/ (캐릭터 이미지 & 소개)</div>
-            <div class="pl-8">├── 📁 2-3주차_동화초안/ (Storybook 링크 & 초안 PDF)</div>
-            <div class="pl-8">└── 📁 4-5주차_최종동화책/ (최종 완성본 PDF & 낭독 대사)</div>
+  <!-- Firebase Live Sync Setup Modal (NEW for GitHub Pages) -->
+  <div id="teacher-firebase-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl border-4 border-amber-300 overflow-hidden p-6 text-left max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-fire"></i>
+          </span>
+          <div>
+            <h3 class="font-jua text-lg text-slate-800">15대 기기 실시간 동기화 (Firebase 연동)</h3>
+            <p class="text-xs text-slate-500">GitHub Pages로 배포 시 서로 다른 노트북/태블릿 간 실시간 관제 연결</p>
           </div>
+        </div>
+        <button id="btn-close-firebase-modal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-xs text-slate-600">
+        <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200">
+          <h4 class="font-bold text-amber-900 mb-1 flex items-center gap-1">
+            <i class="fa-solid fa-circle-info text-amber-600"></i> 깃허브 배포 환경에서의 동작 안내
+          </h4>
+          <ul class="list-disc list-inside space-y-1 text-[11px] text-amber-800 leading-relaxed">
+            <li><strong>학생 개인 자동 저장:</strong> 이 설정 없이도 학생들의 노트북/태블릿 안에서는 지난주 작성 내용이 100% 안전하게 자동 저장됩니다.</li>
+            <li><strong>구글 드라이브 제출:</strong> 과제 제출 또한 구글 앱스 스크립트로 직접 전송되므로 정상 작동합니다.</li>
+            <li><strong>선생님 관제탑 실시간 미러링:</strong> 학생이 타이핑하는 글자를 선생님 노트북 관제탑에 0.5초 만에 실시간으로 띄우려면 무료 Firebase 프로젝트 연동이 필요합니다.</li>
+          </ul>
         </div>
 
         <div>
           <label class="block font-bold text-slate-700 mb-1">
-            구글 앱스 스크립트(Google Apps Script) 웹 앱 URL
+            Firebase 구성 정보 (JSON 형태)
           </label>
-          <div class="flex items-center gap-2">
-            <input id="input-gdrive-webhook-url" type="url" placeholder="https://script.google.com/macros/s/.../exec"
-              class="flex-1 p-2.5 border border-slate-300 rounded-xl font-mono text-xs focus:border-emerald-500 outline-none" />
-            <button id="btn-save-gdrive-webhook" class="bg-emerald-600 hover:bg-emerald-700 text-white font-jua px-4 py-2.5 rounded-xl transition whitespace-nowrap">
-              URL 저장
+          <textarea id="input-firebase-config" rows="5" placeholder='{\n  "apiKey": "AIzaSy...",\n  "projectId": "hwajeong-story",\n  ...\n}'
+            class="w-full p-2.5 border border-slate-300 rounded-xl font-mono text-xs focus:border-amber-500 outline-none"></textarea>
+          <div class="flex items-center justify-between mt-1">
+            <span class="text-[10px] text-slate-400">
+              * Firebase Console(무료) ➔ 프로젝트 설정 ➔ 웹 앱 추가 시 발급되는 firebaseConfig 객체입니다.
+            </span>
+            <button id="btn-save-firebase-config" class="bg-amber-500 hover:bg-amber-600 text-white font-jua px-4 py-1.5 rounded-xl transition">
+              설정 저장 및 연동
             </button>
           </div>
-          <span class="text-[10px] text-slate-400 mt-1 block">
-            * 웹 앱 URL을 등록하면 관제탑의 원클릭 셔터(ON/OFF) 및 학생 제출 자동 연동이 활성화됩니다.
-          </span>
         </div>
 
-        <!-- 1-Minute Setup Guide Accordion -->
-        <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800">🛠️ 원클릭 수신 차단 지원 스크립트 복사</span>
-            <button id="btn-copy-gas-code" class="text-[11px] font-bold text-emerald-700 bg-white border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-50 transition flex items-center gap-1">
-              <i class="fa-solid fa-copy"></i>
-              <span>스크립트 코드 복사</span>
-            </button>
-          </div>
-          <ol class="list-decimal list-inside text-[11px] text-slate-500 space-y-1">
-            <li>Google Drive에서 <strong>[새로 만들기 ➔ 더보기 ➔ Google Apps Script]</strong>를 엽니다.</li>
-            <li>기존 코드를 지우고 위 복사 버튼으로 복사한 스크립트를 붙여넣은 후 저장합니다.</li>
-            <li>우측 상단 <strong>[배포 ➔ 새 배포 ➔ 웹 앱]</strong> 선택 (액세스: <strong>'모든 사용자'</strong> 설정).</li>
-            <li>생성된 <strong>웹 앱 URL</strong>을 위 입력창에 붙여넣고 저장하면 연동 완료!</li>
-          </ol>
+        <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50 space-y-1.5">
+          <span class="font-bold text-slate-800 block">💡 index.html 코드에 직접 넣는 가장 쉬운 방법</span>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            GitHub에 <code>index.html</code>을 올리기 전, 파일 내 <code>GITHUB_FIREBASE_CONFIG</code> 부분에 발급받은 키를 채워 넣고 커밋하시면 15명 학생 기기 전원에 실시간 동기화가 영구 활성화됩니다.
+          </p>
         </div>
       </div>
 
-      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-        <span class="text-[11px] text-slate-400">설정 없이도 브라우저 관제탑 내에서는 모든 파일이 실시간 정상 작동합니다.</span>
-        <button id="btn-done-gdrive-modal" class="bg-slate-800 hover:bg-slate-900 text-white font-jua text-xs px-4 py-2 rounded-xl transition">
+      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end">
+        <button id="btn-done-firebase-modal" class="bg-slate-800 hover:bg-slate-900 text-white font-jua text-xs px-4 py-2 rounded-xl transition">
           닫기
         </button>
       </div>
@@ -869,7 +891,7 @@
       <div class="space-y-2.5 text-left">
         <div>
           <label class="block text-[11px] font-bold text-slate-500 mb-1">현재 비밀번호</label>
-          <input id="input-pin-current" type="password" maxlength="12" placeholder="현재 비밀번호 (기본: 7777)"
+          <input id="input-pin-current" type="password" maxlength="12" placeholder="현재 비밀번호 입력"
             class="w-full text-sm font-mono p-2.5 rounded-xl border border-slate-300 focus:border-indigo-500 outline-none" />
         </div>
         <div>
@@ -949,6 +971,14 @@
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    /* =========================================================================
+       [GitHub Pages 배포 시 15명 기기 실시간 관제탑 연동 설정]
+       무료 Firebase(https://console.firebase.google.com) 프로젝트를 만드셨다면
+       아래 null 대신 발급받은 firebaseConfig 객체를 넣어주세요.
+       (설정하지 않아도 각 학생 기기의 자동 저장과 구글 드라이브 제출은 100% 정상 작동합니다)
+       ========================================================================= */
+    const GITHUB_FIREBASE_CONFIG = null;
+
     /* Web Audio synthesizer */
     let audioCtx = null;
     function playSound(type = 'click') {
@@ -1026,7 +1056,20 @@
       localStorage.setItem(GDRIVE_WEBHOOK_KEY, url);
     }
 
-    /* Drive Master Shutter State: ON(true) = 수신 중, OFF(false) = 수신 마감 */
+    const FIREBASE_CONFIG_KEY = 'hwajeong_firebase_config_custom';
+    function getStoredFirebaseConfig() {
+      try {
+        const item = localStorage.getItem(FIREBASE_CONFIG_KEY);
+        return item ? JSON.parse(item) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    function setStoredFirebaseConfig(configObj) {
+      localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(configObj));
+    }
+
+    /* Drive Master Shutter State */
     const GDRIVE_SHUTTER_KEY = 'hwajeong_gdrive_shutter_active';
     function getStoredGdriveShutterState() {
       const val = localStorage.getItem(GDRIVE_SHUTTER_KEY);
@@ -1037,6 +1080,25 @@
     }
 
     let isDriveShutterActive = getStoredGdriveShutterState();
+
+    const DEVICE_SEAT_STORAGE_KEY = 'hwajeong_my_device_seat';
+
+    function flashAutoSaveIndicator() {
+      const dot = document.getElementById('dot-auto-save');
+      const text = document.getElementById('auto-save-status-text');
+      const badge = document.getElementById('badge-auto-save-status');
+      if (!badge || !text) return;
+
+      badge.className = 'flex items-center gap-1.5 text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-300 px-2.5 py-1 rounded-xl shadow-sm transition-all';
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-indigo-500 scale-125 transition-transform';
+      text.innerText = '방금 자동 저장됨 ✨';
+
+      setTimeout(() => {
+        if (badge) badge.className = 'flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-1 rounded-xl shadow-sm transition-all';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+        if (text) text.innerText = '실시간 자동 저장 중';
+      }, 1200);
+    }
 
     let globalCurriculumState = {
       week: 'week-1',
@@ -1320,6 +1382,7 @@ function doPost(e) {
     function syncStudentData(seatNum) {
       try {
         localStorage.setItem(`hwajeong_student_${seatNum}`, JSON.stringify(studentsData[seatNum]));
+        flashAutoSaveIndicator();
       } catch (e) {}
 
       if (broadcastChannel) {
@@ -1789,7 +1852,6 @@ function doPost(e) {
       document.getElementById('teacher-student-edit-modal')?.classList.remove('hidden');
     }
 
-    /* Custom Toast notification */
     function showToast(msg, isSuccess = true) {
       const toast = document.getElementById('toast');
       const toastMsg = document.getElementById('toast-msg');
@@ -1809,12 +1871,36 @@ function doPost(e) {
       }, 3000);
     }
 
+    /* Helper: Download text file */
+    function triggerDownload(fileName, jsonContent) {
+      const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
     function initApp() {
       // Load stored curriculum state
       try {
         const savedCurr = localStorage.getItem('hwajeong_curriculum_state');
         if (savedCurr) {
           globalCurriculumState = JSON.parse(savedCurr);
+        }
+      } catch (e) {}
+
+      // 1. Restore this specific device's assigned seat number
+      try {
+        const savedDeviceSeat = localStorage.getItem(DEVICE_SEAT_STORAGE_KEY);
+        if (savedDeviceSeat) {
+          const parsedSeat = parseInt(savedDeviceSeat, 10);
+          if (parsedSeat >= 1 && parsedSeat <= 15) {
+            currentSeat = parsedSeat;
+          }
         }
       } catch (e) {}
 
@@ -1838,10 +1924,12 @@ function doPost(e) {
           opt.innerText = `${i}번 좌석`;
           seatSelect.appendChild(opt);
         }
+        // Set the selector to the device's assigned seat
+        seatSelect.value = currentSeat;
 
         seatSelect.addEventListener('change', (e) => {
           const targetSeat = parseInt(e.target.value, 10);
-          if (studentsData[targetSeat]?.isLocked) {
+          if (studentsData[targetSeat]?.isLocked && targetSeat !== currentSeat) {
             showToast(`⚠️ ${targetSeat}번 좌석은 이미 '${studentsData[targetSeat].name}' 작가님이 확정하여 사용 중입니다!`, false);
             playSound('click');
             seatSelect.value = currentSeat;
@@ -1849,21 +1937,39 @@ function doPost(e) {
           }
 
           currentSeat = targetSeat;
-          const s = studentsData[currentSeat];
-          document.getElementById('student-name-input').value = s.name === `작가 ${currentSeat}` ? '' : s.name;
-          document.getElementById('input-hero').value = s.hero || '';
-          document.getElementById('input-traits').value = s.traits || '';
-          document.getElementById('input-item').value = s.item || '';
-          document.getElementById('input-place').value = s.place || '';
-          document.getElementById('input-weather').value = s.weather || '';
-          document.getElementById('input-mission').value = s.mission || '';
-          document.getElementById('input-ending').value = s.ending || '';
-
-          updateStudentLockUI();
-          renderWeeklySubmissionUI(currentWeekMode);
-          updateStudentPromptPreview();
+          try {
+            localStorage.setItem(DEVICE_SEAT_STORAGE_KEY, String(currentSeat));
+          } catch (err) {}
+          loadSeatDataIntoForm(currentSeat);
           playSound('click');
         });
+      }
+
+      function loadSeatDataIntoForm(seatNum) {
+        const s = studentsData[seatNum];
+        document.getElementById('student-name-input').value = s.name === `작가 ${seatNum}` ? '' : s.name;
+        document.getElementById('input-hero').value = s.hero || '';
+        document.getElementById('input-traits').value = s.traits || '';
+        document.getElementById('input-item').value = s.item || '';
+        document.getElementById('input-place').value = s.place || '';
+        document.getElementById('input-weather').value = s.weather || '';
+        document.getElementById('input-mission').value = s.mission || '';
+        document.getElementById('input-ending').value = s.ending || '';
+
+        currentStyle = s.style || '포근하고 따뜻한 수채화 동화책 일러스트';
+        document.querySelectorAll('.btn-style-choice').forEach(btn => {
+          if (btn.getAttribute('data-style') === currentStyle) {
+            btn.classList.add('border-purple-400', 'bg-purple-50', 'text-purple-900', 'active');
+            btn.classList.remove('border-slate-200', 'text-slate-700');
+          } else {
+            btn.classList.remove('border-purple-400', 'bg-purple-50', 'text-purple-900', 'active');
+            btn.classList.add('border-slate-200', 'text-slate-700');
+          }
+        });
+
+        updateStudentLockUI();
+        renderWeeklySubmissionUI(currentWeekMode);
+        updateStudentPromptPreview();
       }
 
       // Lock Student Name Button Handler
@@ -1877,10 +1983,65 @@ function doPost(e) {
 
         studentsData[currentSeat].name = nameVal;
         studentsData[currentSeat].isLocked = true;
+        try {
+          localStorage.setItem(DEVICE_SEAT_STORAGE_KEY, String(currentSeat));
+        } catch (err) {}
         syncStudentData(currentSeat);
         updateStudentLockUI();
         playSound('fanfare');
         showToast(`🔒 ${currentSeat}번 좌석 '${nameVal}' 작가님으로 확정되었습니다! (수정은 선생님께 요청)`);
+      });
+
+      // Individual Student Backup Export Button (NEW)
+      document.getElementById('btn-export-student-backup')?.addEventListener('click', () => {
+        const s = studentsData[currentSeat];
+        const sName = s.name || `작가${currentSeat}`;
+        const fileName = `${currentSeat}번_${sName}_주문서백업.json`;
+        triggerDownload(fileName, JSON.stringify(s, null, 2));
+        playSound('magic');
+        showToast(`💾 [${fileName}] 파일이 안전하게 컴퓨터에 저장되었습니다!`);
+      });
+
+      // Individual Student Backup Import Handler (NEW)
+      document.getElementById('input-import-student-backup')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (loadEvt) => {
+          try {
+            const imported = JSON.parse(loadEvt.target.result);
+            if (!imported || typeof imported.seat === 'undefined') {
+              showToast('⚠️ 올바른 주문서 백업 파일(.json)이 아닙니다.', false);
+              return;
+            }
+
+            // Restore into current seat
+            studentsData[currentSeat] = {
+              ...studentsData[currentSeat],
+              ...imported,
+              seat: currentSeat // Keep current seat index
+            };
+
+            syncStudentData(currentSeat);
+            loadSeatDataIntoForm(currentSeat);
+            playSound('fanfare');
+            showToast(`✨ '${imported.name || '작가'}' 님의 지난 작업 내용이 성공적으로 복원되었습니다!`);
+          } catch (err) {
+            showToast('백업 파일을 읽는 중 오류가 발생했습니다.', false);
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // Reset file input
+      });
+
+      // Teacher Entire Class Backup Export Button (NEW)
+      document.getElementById('btn-export-all-class')?.addEventListener('click', () => {
+        const today = new Date().toISOString().slice(0, 10);
+        const fileName = `화정도서관_15명_전체동화백업_${today}.json`;
+        triggerDownload(fileName, JSON.stringify(studentsData, null, 2));
+        playSound('magic');
+        showToast(`📁 15명 전체 학생의 현재 작성 상태가 [${fileName}] 파일로 다운로드되었습니다!`);
       });
 
       // Student Tab clicks
@@ -1950,7 +2111,7 @@ function doPost(e) {
         showToast('🔓 학생 자율 선택 모드가 켜졌습니다. 아이들이 원하는 탭을 눌러볼 수 있습니다.');
       });
 
-      // Master Drive Shutter Button Click Handler (NEW)
+      // Master Drive Shutter Button Click Handler
       document.getElementById('btn-toggle-drive-shutter')?.addEventListener('click', () => {
         isDriveShutterActive = !isDriveShutterActive;
         broadcastShutterControl(isDriveShutterActive);
@@ -2315,6 +2476,46 @@ function doPost(e) {
         document.body.removeChild(tempTa);
       });
 
+      // Firebase Settings Modal (NEW)
+      const firebaseModal = document.getElementById('teacher-firebase-modal');
+      const inputFirebaseConfig = document.getElementById('input-firebase-config');
+
+      document.getElementById('btn-open-firebase-settings')?.addEventListener('click', () => {
+        const saved = getStoredFirebaseConfig() || GITHUB_FIREBASE_CONFIG;
+        if (inputFirebaseConfig) {
+          inputFirebaseConfig.value = saved ? JSON.stringify(saved, null, 2) : '';
+        }
+        firebaseModal?.classList.remove('hidden');
+      });
+
+      document.getElementById('btn-close-firebase-modal')?.addEventListener('click', () => {
+        firebaseModal?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-done-firebase-modal')?.addEventListener('click', () => {
+        firebaseModal?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-save-firebase-config')?.addEventListener('click', () => {
+        const val = inputFirebaseConfig?.value.trim();
+        if (!val) {
+          setStoredFirebaseConfig(null);
+          showToast('Firebase 설정이 초기화되었습니다.');
+          firebaseModal?.classList.add('hidden');
+          return;
+        }
+        try {
+          const parsed = JSON.parse(val);
+          setStoredFirebaseConfig(parsed);
+          firebaseModal?.classList.add('hidden');
+          playSound('magic');
+          showToast('🔥 Firebase 실시간 DB가 연결되었습니다! 페이지를 새로고침합니다.');
+          setTimeout(() => location.reload(), 1000);
+        } catch (e) {
+          showToast('⚠️ 올바른 JSON 형식이 아닙니다. 형식을 확인해주세요.', false);
+        }
+      });
+
       // Teacher PIN Change Modal
       const pinModal = document.getElementById('teacher-pin-modal');
       const inputPinCurrent = document.getElementById('input-pin-current');
@@ -2482,6 +2683,8 @@ function doPost(e) {
       });
 
       // Initialize UI Views
+      if (seatSelect) seatSelect.value = currentSeat;
+      loadSeatDataIntoForm(currentSeat);
       applyCurriculumControl(globalCurriculumState.week || 'week-1', globalCurriculumState.allowStudentSwitch || false, false);
       updateStudentLockUI();
       renderWeeklySubmissionUI(currentWeekMode);
@@ -2495,8 +2698,12 @@ function doPost(e) {
 
     async function setupFirebase() {
       try {
-        if (!rawFirebaseConfig) return;
-        const app = initializeApp(rawFirebaseConfig);
+        const activeFirebaseConfig = typeof __firebase_config !== 'undefined'
+          ? __firebase_config
+          : (GITHUB_FIREBASE_CONFIG || getStoredFirebaseConfig() || rawFirebaseConfig);
+
+        if (!activeFirebaseConfig) return;
+        const app = initializeApp(activeFirebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
 
