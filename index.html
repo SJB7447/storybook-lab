@@ -523,7 +523,7 @@
             <span>저장 위치: <strong class="text-slate-700">화정도서관 AI 동화책 만들기 / <span id="label-student-folder-target">01번_작가 1</span></strong></span>
           </div>
           <button id="btn-submit-weekly" type="button" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-jua text-sm md:text-base py-2.5 px-6 rounded-xl shadow-md transition flex items-center gap-2 active:scale-95">
-            <i class="fa-solid fa-paper-plane"></i>
+            <i id="icon-submit-status" class="fa-solid fa-paper-plane"></i>
             <span id="btn-submit-weekly-text">선생님 화면 & 구글 드라이브로 과제 전송하기</span>
           </button>
         </div>
@@ -565,6 +565,13 @@
             <div class="bg-indigo-50 text-indigo-700 px-2.5 py-1.5 rounded-xl border border-indigo-200">
               과제제출: <strong id="count-done">0</strong>
             </div>
+
+            <!-- Drive Master Reception Shutter Toggle Button (NEW) -->
+            <button id="btn-toggle-drive-shutter" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs px-3 py-1.5 rounded-xl border border-emerald-300 font-bold transition flex items-center gap-1.5" title="수업 종료 후 버튼 하나로 구글 드라이브 외부 수신을 즉시 차단하거나 다시 엽니다">
+              <span id="shutter-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="shutter-btn-label">드라이브 수신 활성(ON)</span>
+            </button>
+
             <button id="btn-demo-fill" class="bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs px-3 py-1.5 rounded-xl border border-purple-300 font-bold transition flex items-center gap-1">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
               <span>5명 샘플 채우기</span>
@@ -791,10 +798,10 @@
       <div class="space-y-3.5 text-xs text-slate-600">
         <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200">
           <h4 class="font-bold text-emerald-900 mb-1 flex items-center gap-1">
-            <i class="fa-solid fa-circle-info text-emerald-600"></i> 자동 폴더 구조 안내
+            <i class="fa-solid fa-circle-info text-emerald-600"></i> 자동 폴더 구조 및 셔터 제어 안내
           </h4>
           <p class="text-[11px] leading-relaxed text-emerald-800">
-            학생이 과제를 제출하면 선생님의 구글 드라이브에 아래 구조로 폴더가 즉시 자동 생성되고 파일 및 링크가 차곡차곡 저장됩니다:
+            학생이 과제를 제출하면 선생님의 구글 드라이브에 아래 구조로 폴더가 즉시 자동 생성되고 파일 및 링크가 차곡차곡 저장됩니다. 수업이 끝나면 관제탑의 <strong>[드라이브 수신 스위치]</strong> 버튼을 한 번만 누르면 외부 수신이 즉시 차단됩니다:
           </p>
           <div class="mt-2 font-mono text-[11px] bg-white p-2.5 rounded-xl border border-emerald-200 text-slate-700 space-y-0.5">
             <div>📁 화정도서관 AI 동화책 만들기</div>
@@ -817,14 +824,14 @@
             </button>
           </div>
           <span class="text-[10px] text-slate-400 mt-1 block">
-            * 웹 앱 URL을 등록하면 학생들이 제출할 때마다 선생님 구글 드라이브로 다이렉트 전송됩니다.
+            * 웹 앱 URL을 등록하면 관제탑의 원클릭 셔터(ON/OFF) 및 학생 제출 자동 연동이 활성화됩니다.
           </span>
         </div>
 
         <!-- 1-Minute Setup Guide Accordion -->
         <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800">🛠️ 1분 간편 연동 스크립트 복사하기</span>
+            <span class="font-bold text-slate-800">🛠️ 원클릭 수신 차단 지원 스크립트 복사</span>
             <button id="btn-copy-gas-code" class="text-[11px] font-bold text-emerald-700 bg-white border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-50 transition flex items-center gap-1">
               <i class="fa-solid fa-copy"></i>
               <span>스크립트 코드 복사</span>
@@ -1019,6 +1026,18 @@
       localStorage.setItem(GDRIVE_WEBHOOK_KEY, url);
     }
 
+    /* Drive Master Shutter State: ON(true) = 수신 중, OFF(false) = 수신 마감 */
+    const GDRIVE_SHUTTER_KEY = 'hwajeong_gdrive_shutter_active';
+    function getStoredGdriveShutterState() {
+      const val = localStorage.getItem(GDRIVE_SHUTTER_KEY);
+      return val === null ? true : val === 'true';
+    }
+    function setStoredGdriveShutterState(isActive) {
+      localStorage.setItem(GDRIVE_SHUTTER_KEY, String(isActive));
+    }
+
+    let isDriveShutterActive = getStoredGdriveShutterState();
+
     let globalCurriculumState = {
       week: 'week-1',
       allowStudentSwitch: false
@@ -1056,11 +1075,32 @@
     let isTeacherUnlocked = false;
     let editingSeatTarget = null;
 
-    /* Google Apps Script template code for teacher copy */
-    const GOOGLE_APPS_SCRIPT_TEMPLATE = `// [화정도서관 AI 동화책 만들기] Google Drive 자동 폴더 정리 스크립트
+    /* Google Apps Script template code with Master Shutter (ON/OFF) support */
+    const GOOGLE_APPS_SCRIPT_TEMPLATE = `// [화정도서관 AI 동화책 만들기] Google Drive 자동 폴더 정리 & 원클릭 수신 셔터 스크립트
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
+    var props = PropertiesService.getScriptProperties();
+
+    // 1. [선생님 관제탑 셔터 제어] 수신 활성화/마감 상태 원격 토글 명령 처리
+    if (data.action === "SET_SHUTTER_STATUS") {
+      props.setProperty("IS_ACTIVE", data.active ? "true" : "false");
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        isShutterActive: data.active
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 2. [수신 셔터 보안 검사] 마감(false) 상태인 경우 파일 생성 및 드라이브 쓰기 즉시 차단
+    var isShutterActive = props.getProperty("IS_ACTIVE");
+    if (isShutterActive === "false") {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "closed",
+        message: "현재는 과제 수신이 마감된 상태입니다. (선생님이 수신을 일시 중지함)"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 3. 학생 과제 정상 저장 로직 (루트 폴더 생성 및 정리)
     var rootFolderName = "화정도서관 AI 동화책 만들기";
     var rootFolder;
     var rIter = DriveApp.getFoldersByName(rootFolderName);
@@ -1089,6 +1129,7 @@ function doPost(e) {
       weekFolder = studentFolder.createFolder(weekFolderName);
     }
 
+    // 파일 업로드 처리
     if (data.fileBase64 && data.fileName) {
       var base64Part = data.fileBase64.indexOf(",") > -1 ? data.fileBase64.split(",")[1] : data.fileBase64;
       var decoded = Utilities.base64Decode(base64Part);
@@ -1096,6 +1137,7 @@ function doPost(e) {
       weekFolder.createFile(blob);
     }
 
+    // 링크 및 텍스트 기록 저장
     if (data.note || data.linkUrl) {
       var txtContent = "=== 화정도서관 AI 동화책 만들기 과제 기록 ===\\n"
         + "좌석: " + data.seat + "번\\n"
@@ -1120,6 +1162,10 @@ function doPost(e) {
       const webhookUrl = getStoredGdriveWebhook();
       if (!webhookUrl) return { skipped: true };
 
+      if (!isDriveShutterActive) {
+        return { closed: true, message: "선생님이 과제 접수를 마감했습니다." };
+      }
+
       try {
         await fetch(webhookUrl, {
           method: 'POST',
@@ -1131,6 +1177,26 @@ function doPost(e) {
       } catch (err) {
         console.warn('Google Drive webhook sync warning:', err);
         return { error: err };
+      }
+    }
+
+    async function syncShutterRemoteCommand(isActive) {
+      const webhookUrl = getStoredGdriveWebhook();
+      if (!webhookUrl) return;
+
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'SET_SHUTTER_STATUS',
+            active: isActive,
+            timestamp: Date.now()
+          })
+        });
+      } catch (e) {
+        console.warn('Shutter remote sync failed:', e);
       }
     }
 
@@ -1306,6 +1372,72 @@ function doPost(e) {
       }
     }
 
+    function broadcastShutterControl(isActive) {
+      isDriveShutterActive = isActive;
+      setStoredGdriveShutterState(isActive);
+
+      if (broadcastChannel) {
+        try {
+          broadcastChannel.postMessage({
+            type: 'SHUTTER_CONTROL',
+            isShutterActive: isActive
+          });
+        } catch (e) {}
+      }
+
+      if (db) {
+        try {
+          const configDocRef = doc(db, 'artifacts', appId, 'config', 'shutter');
+          setDoc(configDocRef, { isShutterActive: isActive, updatedAt: Date.now() }, { merge: true });
+        } catch (err) {
+          console.warn('Firebase shutter sync warning:', err);
+        }
+      }
+
+      updateShutterUI();
+    }
+
+    function updateShutterUI() {
+      const btnShutter = document.getElementById('btn-toggle-drive-shutter');
+      const dot = document.getElementById('shutter-indicator-dot');
+      const label = document.getElementById('shutter-btn-label');
+      const submitBtn = document.getElementById('btn-submit-weekly');
+      const submitBtnText = document.getElementById('btn-submit-weekly-text');
+      const submitIcon = document.getElementById('icon-submit-status');
+
+      if (isDriveShutterActive) {
+        if (btnShutter) {
+          btnShutter.className = "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs px-3 py-1.5 rounded-xl border border-emerald-300 font-bold transition flex items-center gap-1.5";
+        }
+        if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        if (label) label.innerText = "드라이브 수신 활성(ON)";
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.className = "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-jua text-sm md:text-base py-2.5 px-6 rounded-xl shadow-md transition flex items-center gap-2 active:scale-95 cursor-pointer";
+        }
+        if (submitBtnText) {
+          submitBtnText.innerText = currentWeekMode === 'week-1'
+            ? "선생님 화면 & 구글 드라이브로 1주차 캐릭터 전송"
+            : (currentWeekMode === 'week-2' ? "선생님 화면 & 구글 드라이브로 2~3주차 초안 전송" : "선생님 화면 & 구글 드라이브로 최종 완성본 전송");
+        }
+        if (submitIcon) submitIcon.className = "fa-solid fa-paper-plane";
+      } else {
+        if (btnShutter) {
+          btnShutter.className = "bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs px-3 py-1.5 rounded-xl border border-rose-300 font-bold transition flex items-center gap-1.5";
+        }
+        if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
+        if (label) label.innerText = "드라이브 수신 마감(OFF)";
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.className = "bg-slate-300 text-slate-500 font-jua text-sm md:text-base py-2.5 px-6 rounded-xl shadow-none transition flex items-center gap-2 cursor-not-allowed";
+        }
+        if (submitBtnText) submitBtnText.innerText = "🔒 과제 접수 마감 (선생님이 접수를 닫았습니다)";
+        if (submitIcon) submitIcon.className = "fa-solid fa-lock";
+      }
+    }
+
     function renderWeeklySubmissionUI(week) {
       const formW1 = document.getElementById('form-week-1');
       const formW2 = document.getElementById('form-week-2');
@@ -1313,7 +1445,6 @@ function doPost(e) {
       const titleEl = document.getElementById('submission-step-title');
       const descEl = document.getElementById('submission-step-desc');
       const iconEl = document.getElementById('submission-step-icon');
-      const btnText = document.getElementById('btn-submit-weekly-text');
       const folderTarget = document.getElementById('label-student-folder-target');
       const gdriveIndicator = document.getElementById('badge-gdrive-sync-indicator');
 
@@ -1324,12 +1455,15 @@ function doPost(e) {
 
       const hasGdrive = Boolean(getStoredGdriveWebhook());
       if (gdriveIndicator) {
-        if (hasGdrive) {
-          gdriveIndicator.className = 'text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1';
-          gdriveIndicator.innerHTML = '<i class="fa-brands fa-google-drive text-emerald-600"></i> 드라이브 자동 저장 연결됨';
-        } else {
+        if (!hasGdrive) {
           gdriveIndicator.className = 'text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full flex items-center gap-1';
           gdriveIndicator.innerHTML = '<i class="fa-solid fa-hard-drive"></i> 로컬 저장 모드';
+        } else if (isDriveShutterActive) {
+          gdriveIndicator.className = 'text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1';
+          gdriveIndicator.innerHTML = '<i class="fa-brands fa-google-drive text-emerald-600"></i> 드라이브 접수 중 (열림)';
+        } else {
+          gdriveIndicator.className = 'text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full flex items-center gap-1';
+          gdriveIndicator.innerHTML = '<i class="fa-solid fa-lock text-rose-600"></i> 드라이브 접수 마감 (닫힘)';
         }
       }
 
@@ -1356,7 +1490,6 @@ function doPost(e) {
         if (titleEl) titleEl.innerText = "🐻 1주차 미션: 내 주인공 캐릭터 파일 제출";
         if (descEl) descEl.innerText = "제미나이에서 완성한 첫 번째 주인공 사진과 소개를 등록하세요.";
         if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>';
-        if (btnText) btnText.innerText = "선생님 화면 & 구글 드라이브로 1주차 캐릭터 전송";
         const introInput = document.getElementById('input-w1-intro');
         if (introInput) introInput.value = currentSub?.intro || '';
       } else if (week === 'week-2') {
@@ -1364,7 +1497,6 @@ function doPost(e) {
         if (titleEl) titleEl.innerText = "📖 2~3주차 미션: 제미나이 Storybook 동화 초안 제출";
         if (descEl) descEl.innerText = "제미나이 공유 링크 또는 초안 파일(PDF/이미지)을 등록하세요.";
         if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-book-open"></i>';
-        if (btnText) btnText.innerText = "선생님 화면 & 구글 드라이브로 2~3주차 초안 전송";
         const summaryInput = document.getElementById('input-w2-summary');
         const linkInput = document.getElementById('input-w2-link');
         if (summaryInput) summaryInput.value = currentSub?.summary || '';
@@ -1374,12 +1506,13 @@ function doPost(e) {
         if (titleEl) titleEl.innerText = "🎤 4~5주차 미션: 최종 완성된 동화책 & 낭독 발표 등록";
         if (descEl) descEl.innerText = "최종 동화책 PDF 파일/링크와 낭독할 명대사를 등록해 발표를 준비하세요.";
         if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>';
-        if (btnText) btnText.innerText = "선생님 화면 & 구글 드라이브로 최종 완성본 전송";
         const lineInput = document.getElementById('input-w4-line');
         const link4Input = document.getElementById('input-w4-link');
         if (lineInput) lineInput.value = currentSub?.recitationLine || '';
         if (link4Input) link4Input.value = currentSub?.linkUrl || '';
       }
+
+      updateShutterUI();
     }
 
     function renderTeacherCards() {
@@ -1817,6 +1950,20 @@ function doPost(e) {
         showToast('🔓 학생 자율 선택 모드가 켜졌습니다. 아이들이 원하는 탭을 눌러볼 수 있습니다.');
       });
 
+      // Master Drive Shutter Button Click Handler (NEW)
+      document.getElementById('btn-toggle-drive-shutter')?.addEventListener('click', () => {
+        isDriveShutterActive = !isDriveShutterActive;
+        broadcastShutterControl(isDriveShutterActive);
+        syncShutterRemoteCommand(isDriveShutterActive);
+        playSound('magic');
+
+        if (isDriveShutterActive) {
+          showToast('🟢 구글 드라이브 수신이 시작되었습니다. (학생 제출 허용)');
+        } else {
+          showToast('🔴 구글 드라이브 수신이 마감(차단)되었습니다. (수업 종료 보호 모드)');
+        }
+      });
+
       // Typing Sound and Auto-Assembly Inputs
       const inputIds = ['input-hero', 'input-traits', 'input-item', 'input-place', 'input-weather', 'input-mission', 'input-ending', 'student-name-input'];
       inputIds.forEach(id => {
@@ -1937,6 +2084,12 @@ function doPost(e) {
       });
 
       document.getElementById('btn-submit-weekly')?.addEventListener('click', async () => {
+        if (!isDriveShutterActive) {
+          playSound('click');
+          showToast('🔒 지금은 선생님께서 과제 수신을 마감하셨습니다. (선생님께 확인해주세요)', false);
+          return;
+        }
+
         const s = studentsData[currentSeat];
         const studentName = s.name || `작가 ${currentSeat}`;
         const week = currentWeekMode;
@@ -2002,7 +2155,11 @@ function doPost(e) {
         renderWeeklySubmissionUI(week);
         playSound('magic');
 
-        uploadToGoogleDrive(gdrivePayload);
+        const uploadRes = await uploadToGoogleDrive(gdrivePayload);
+        if (uploadRes && uploadRes.closed) {
+          showToast('🔒 과제 접수가 마감되어 드라이브에 저장되지 않았습니다.', false);
+          return;
+        }
 
         const weekLabelKr = week === 'week-1' ? '1주차 캐릭터' : (week === 'week-2' ? '2~3주차 동화 초안' : '4~5주차 최종 동화책');
         showToast(`✨ ${weekLabelKr} 과제가 선생님 화면 및 드라이브로 안전하게 전송되었습니다!`);
@@ -2038,6 +2195,7 @@ function doPost(e) {
         viewTeacher?.classList.remove('hidden');
         renderTeacherCards();
         updateStats();
+        updateShutterUI();
       }
 
       function openTeacherAuth() {
@@ -2150,7 +2308,7 @@ function doPost(e) {
         try {
           document.execCommand('copy');
           playSound('magic');
-          showToast('📋 구글 드라이브 자동 연동 스크립트가 복사되었습니다!');
+          showToast('📋 원클릭 수신 차단 지원 스크립트가 복사되었습니다!');
         } catch (e) {
           showToast('코드 복사에 실패했습니다.', false);
         }
@@ -2288,6 +2446,9 @@ function doPost(e) {
           } else if (msg.type === 'CURRICULUM_CONTROL' && msg.curriculum) {
             globalCurriculumState = msg.curriculum;
             applyCurriculumControl(globalCurriculumState.week, globalCurriculumState.allowStudentSwitch, false);
+          } else if (msg.type === 'SHUTTER_CONTROL') {
+            isDriveShutterActive = msg.isShutterActive;
+            updateShutterUI();
           }
         };
       } catch (e) {}
@@ -2314,6 +2475,9 @@ function doPost(e) {
               applyCurriculumControl(curr.week, curr.allowStudentSwitch, false);
             }
           } catch (err) {}
+        } else if (e.key === GDRIVE_SHUTTER_KEY) {
+          isDriveShutterActive = e.newValue === 'true';
+          updateShutterUI();
         }
       });
 
@@ -2323,6 +2487,7 @@ function doPost(e) {
       renderWeeklySubmissionUI(currentWeekMode);
       renderTeacherCards();
       updateStats();
+      updateShutterUI();
 
       // Setup Firebase if credentials are provided
       setupFirebase();
@@ -2363,6 +2528,16 @@ function doPost(e) {
             const curr = docSnap.data();
             globalCurriculumState = curr;
             applyCurriculumControl(curr.week, curr.allowStudentSwitch, false);
+          }
+        });
+
+        const shutterDoc = doc(db, 'artifacts', appId, 'config', 'shutter');
+        onSnapshot(shutterDoc, (docSnap) => {
+          if (docSnap.exists()) {
+            const shutterData = docSnap.data();
+            isDriveShutterActive = shutterData.isShutterActive;
+            setStoredGdriveShutterState(isDriveShutterActive);
+            updateShutterUI();
           }
         });
       } catch (err) {
