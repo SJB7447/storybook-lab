@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>상상력이 쑥쑥! AI 동화 마법 주문 연구소 & 실시간 수업 대시보드</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Jua & Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #fdfbf7;
+    }
+    .font-jua {
+      font-family: 'Jua', cursive, sans-serif;
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
+    }
+    .animate-float {
+      animation: floatSlow 3.5s ease-in-out infinite;
+    }
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .card-bounce {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    }
+    .card-bounce:hover {
+      transform: translateY(-3px) scale(1.01);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col selection:bg-amber-200">
+
+  <header class="bg-white/95 backdrop-blur-md border-b-2 border-amber-100 sticky top-0 z-40 px-4 py-2.5 shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 via-orange-400 to-pink-500 flex items-center justify-center text-white text-xl shadow-md">
+          <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+            화정도서관 AI 디지털 배움터 징검다리
+          </span>
+          <h1 class="text-lg md:text-xl font-jua text-slate-800 tracking-wide">
+            나만의 AI 동화 마법 주문 연구소
+          </h1>
+        </div>
+      </div>
+
+      <!-- Mode Switcher (Student vs Teacher) -->
+      <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
+        <button id="btn-mode-student" class="px-3.5 py-1.5 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 transition-all bg-white text-amber-600 shadow-sm">
+          <i class="fa-solid fa-feather"></i>
+          <span>꼬마 작가 모드 (학생)</span>
+        </button>
+        <button id="btn-mode-teacher" class="px-3.5 py-1.5 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 transition-all text-slate-600 hover:text-slate-900">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>선생님 관제탑 (15명 실시간)</span>
+          <span id="badge-online-count" class="bg-emerald-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-sans">0명 활동중</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-6">
+
+    <!-- ============================================== -->
+    <!-- [MODE 1] 꼬마 작가 화면 (STUDENT MODE)           -->
+    <!-- ============================================== -->
+    <div id="view-student" class="space-y-5">
+      
+      <!-- Seat & Name Banner -->
+      <div class="bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 rounded-3xl p-4 md:p-5 text-white shadow-md relative overflow-hidden">
+        <div class="absolute right-[-15px] bottom-[-15px] opacity-15 text-8xl pointer-events-none">
+          <i class="fa-solid fa-book-open"></i>
+        </div>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl md:text-2xl font-jua flex items-center gap-2">
+              <span>✨ 꼬마 작가님의 상상 공작소</span>
+            </h2>
+            <p class="text-amber-100 text-xs md:text-sm">
+              상자마다 생각나는 단어를 톡톡 적으면 제미나이 AI 화가가 읽을 수 있는 마법 주문이 완성돼요!
+            </p>
+          </div>
+
+          <!-- Seat & Name Picker -->
+          <div class="bg-white/95 text-slate-800 p-2.5 md:p-3 rounded-2xl shadow flex items-center gap-2.5 backdrop-blur-sm">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 mb-0.5">내 좌석 번호</label>
+              <select id="student-seat-select" class="bg-amber-50 border border-amber-300 font-jua text-amber-700 text-base rounded-xl px-2 py-1 focus:ring-2 focus:ring-amber-400 outline-none cursor-pointer transition">
+                <!-- 1 to 15 generated via JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 mb-0.5">작가 이름(별명)</label>
+              <input id="student-name-input" type="text" placeholder="예: 민우 작가" maxlength="10"
+                class="border border-slate-300 rounded-xl px-2.5 py-1 text-xs md:text-sm font-bold text-slate-800 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none w-28 md:w-32 transition" />
+            </div>
+            <button id="btn-lock-name" type="button" class="px-2.5 py-1.5 rounded-xl font-jua text-xs bg-amber-500 hover:bg-amber-600 text-white shadow-sm flex items-center gap-1 transition active:scale-95 self-end mb-0.5" title="내 이름과 좌석을 확정하여 다른 친구가 수정하지 못하게 잠급니다">
+              <i class="fa-solid fa-lock"></i>
+              <span>이름 확정</span>
+            </button>
+            <div id="badge-name-locked" class="hidden text-[11px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-xl items-center gap-1.5 self-end mb-0.5">
+              <i class="fa-solid fa-shield-halved text-amber-600"></i>
+              <span>확정됨 (수정은 선생님께 요청)</span>
+            </div>
+            <div class="text-[11px] text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-xl self-end mb-0.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              연결됨
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5-Week Curriculum Bridge Selector -->
+      <div class="bg-white rounded-2xl p-2 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-1">
+          <span class="text-xs font-bold text-slate-400 px-2">오늘의 수업 단계:</span>
+          <button type="button" id="tab-week-1" class="btn-week-tab active px-3 py-1.5 rounded-xl text-xs font-jua transition bg-amber-500 text-white shadow-sm flex items-center gap-1">
+            <span>🐻 1주차: 주인공 캐릭터 소환</span>
+          </button>
+          <button type="button" id="tab-week-2" class="btn-week-tab px-3 py-1.5 rounded-xl text-xs font-jua transition bg-slate-100 hover:bg-amber-100 text-slate-700 flex items-center gap-1">
+            <span>📖 2~3주차: 동화책 전체 주문서</span>
+          </button>
+          <button type="button" id="tab-week-4" class="btn-week-tab px-3 py-1.5 rounded-xl text-xs font-jua transition bg-slate-100 hover:bg-amber-100 text-slate-700 flex items-center gap-1">
+            <span>🎤 4~5주차: 꼬마 성우 & 작품 발표</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="badge-teacher-curriculum-sync" class="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-xl flex items-center gap-1.5">
+            <i class="fa-solid fa-satellite-dish animate-pulse text-indigo-500"></i>
+            <span id="curriculum-sync-text">선생님 지정 1주차 진행 중 🔒</span>
+          </span>
+          <div class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 hidden sm:block">
+            💡 질문을 하나씩 채워보세요!
+          </div>
+        </div>
+      </div>
+
+      <!-- Granular 7-Step Step-by-Step Prompt Cards -->
+      <div class="space-y-4">
+        
+        <!-- Part A: Character Building (Steps 1, 2, 3) -->
+        <div class="bg-amber-50/50 rounded-3xl p-4 border border-amber-200">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-jua bg-amber-500 text-white shadow-sm">1단계</span>
+            <h3 class="font-jua text-base text-amber-950">내 동화 속 매력 넘치는 주인공 탄생시키기</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            
+            <!-- Step 1: Identity -->
+            <div class="bg-white border-2 border-amber-200 rounded-2xl p-3.5 shadow-sm card-bounce">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 font-jua text-xs flex items-center justify-center">1-1</span>
+                <h4 class="font-jua text-sm text-slate-800">누구인가요? (정체) 🐻</h4>
+              </div>
+              <input id="input-hero" type="text" placeholder="예: 아기 다람쥐, 날개 달린 호랑이"
+                class="w-full text-sm font-bold p-2.5 bg-amber-50/40 rounded-xl border border-amber-200 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition" />
+              <div class="flex flex-wrap gap-1 mt-2">
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-amber-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-hero" data-val="아기 다람쥐">아기 다람쥐</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-amber-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-hero" data-val="날개 달린 호랑이">날개 호랑이</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-amber-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-hero" data-val="초콜릿 로봇">초콜릿 로봇</button>
+              </div>
+            </div>
+
+            <!-- Step 2: Appearance & Outfits -->
+            <div class="bg-white border-2 border-amber-200 rounded-2xl p-3.5 shadow-sm card-bounce">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 font-jua text-xs flex items-center justify-center">1-2</span>
+                <h4 class="font-jua text-sm text-slate-800">어떤 옷/외모인가요? 👓</h4>
+              </div>
+              <input id="input-traits" type="text" placeholder="예: 동그란 안경과 초록 멜빵바지"
+                class="w-full text-sm font-bold p-2.5 bg-amber-50/40 rounded-xl border border-amber-200 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition" />
+              <div class="flex flex-wrap gap-1 mt-2">
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-amber-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-traits" data-val="동그란 안경과 초록 멜빵바지">안경 & 멜빵바지</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-amber-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-traits" data-val="빨간 꼬깔모자와 노란 망토">빨간 모자 & 망토</button>
+              </div>
+            </div>
+
+            <!-- Step 3: Treasure / Item -->
+            <div class="bg-white border-2 border-amber-200 rounded-2xl p-3.5 shadow-sm card-bounce">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 font-jua text-xs flex items-center justify-center">1-3</span>
+                <h4 class="font-jua text-sm text-slate-800">소중한 보물이나 소지품은? 🎒</h4>
+              </div>
+              <input id="input-item" type="text" placeholder="예: 반짝이는 별 지팡이, 도토리 가방"
+                class="w-full text-sm font-bold p-2.5 bg-amber-50/40 rounded-xl border border-amber-200 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition" />
+              <div class="flex flex-wrap gap-1 mt-2">
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-amber-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-item" data-val="도토리 모양 크로스백">도토리 가방</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-amber-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-item" data-val="반짝반짝 별빛 지팡이">별빛 지팡이</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-amber-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-item" data-val="비밀 마법 지도">비밀 지도</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Part B: Setting the World (Steps 4, 5) -->
+        <div id="section-part-b" class="bg-emerald-50/50 rounded-3xl p-4 border border-emerald-200 transition-all">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-jua bg-emerald-600 text-white shadow-sm">2단계</span>
+            <h3 class="font-jua text-base text-emerald-950">이야기가 펼쳐지는 세상과 시간 분위기</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            
+            <!-- Step 4: Location -->
+            <div class="bg-white border-2 border-emerald-200 rounded-2xl p-3.5 shadow-sm card-bounce">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 font-jua text-xs flex items-center justify-center">2-1</span>
+                <h4 class="font-jua text-sm text-slate-800">어디로 떠나볼까요? (장소) 🏰</h4>
+              </div>
+              <input id="input-place" type="text" placeholder="예: 밤이 되면 마법이 열리는 화정도서관 서재"
+                class="w-full text-sm font-bold p-2.5 bg-emerald-50/40 rounded-xl border border-emerald-200 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" />
+              <div class="flex flex-wrap gap-1 mt-2">
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-place" data-val="화정도서관 비밀 마법 서재">화정도서관 서재</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-place" data-val="달콤한 솜사탕 구름 나라">솜사탕 구름 나라</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-place" data-val="신비한 바닷속 산호초 궁전">바닷속 산호 궁전</button>
+              </div>
+            </div>
+
+            <!-- Step 5: Time / Weather -->
+            <div class="bg-white border-2 border-emerald-200 rounded-2xl p-3.5 shadow-sm card-bounce">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 font-jua text-xs flex items-center justify-center">2-2</span>
+                <h4 class="font-jua text-sm text-slate-800">그곳의 날씨나 시간대는? ⛅</h4>
+              </div>
+              <input id="input-weather" type="text" placeholder="예: 별빛이 은하수처럼 쏟아지는 신비로운 밤"
+                class="w-full text-sm font-bold p-2.5 bg-emerald-50/40 rounded-xl border border-emerald-200 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" />
+              <div class="flex flex-wrap gap-1 mt-2">
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-weather" data-val="별빛이 쏟아지는 고요한 밤">별빛 쏟아지는 밤</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-weather" data-val="비 온 뒤 커다란 무지개가 뜬 오후">무지개 뜬 오후</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-weather" data-val="따뜻한 아침 햇살이 반짝이는 숲">아침 햇살 숲</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Part C: Adventure & Ending (Steps 6, 7) -->
+        <div id="section-part-c" class="bg-indigo-50/50 rounded-3xl p-4 border border-indigo-200 transition-all">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-jua bg-indigo-600 text-white shadow-sm">3단계</span>
+            <h3 class="font-jua text-base text-indigo-950">흥미진진한 모험과 마음 따뜻해지는 결말</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            
+            <!-- Step 6: Adventure / Problem -->
+            <div class="bg-white border-2 border-indigo-200 rounded-2xl p-3.5 shadow-sm card-bounce">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-jua text-xs flex items-center justify-center">3-1</span>
+                <h4 class="font-jua text-sm text-slate-800">어떤 모험이나 사건이 생기나요? 🚀</h4>
+              </div>
+              <input id="input-mission" type="text" placeholder="예: 하늘을 날아다니는 황금 마법 책을 찾으러 가요"
+                class="w-full text-sm font-bold p-2.5 bg-indigo-50/40 rounded-xl border border-indigo-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition" />
+              <div class="flex flex-wrap gap-1 mt-2">
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-indigo-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-mission" data-val="하늘을 날아다니는 황금 마법 책을 찾으러 가요">날아다니는 마법 책</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-indigo-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-mission" data-val="사라진 무지개 조각을 모아 친구들을 구해요">무지개 조각 구하기</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-indigo-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-mission" data-val="길 잃은 아기 별을 하늘 엄마에게 데려다줘요">아기 별 집 찾아주기</button>
+              </div>
+            </div>
+
+            <!-- Step 7: Goal / Warm Ending -->
+            <div class="bg-white border-2 border-indigo-200 rounded-2xl p-3.5 shadow-sm card-bounce">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-jua text-xs flex items-center justify-center">3-2</span>
+                <h4 class="font-jua text-sm text-slate-800">이야기의 행복한 결말이나 목표는? 💖</h4>
+              </div>
+              <input id="input-ending" type="text" placeholder="예: 숲속 친구들과 함께 맛있는 파티를 열고 환하게 웃어요"
+                class="w-full text-sm font-bold p-2.5 bg-indigo-50/40 rounded-xl border border-indigo-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition" />
+              <div class="flex flex-wrap gap-1 mt-2">
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-indigo-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-ending" data-val="숲속 친구들과 달콤한 도토리 파티를 열어요">친구들과 도토리 파티</button>
+                <button type="button" class="btn-quick-chip text-[11px] bg-slate-100 hover:bg-indigo-100 text-slate-600 px-2 py-0.5 rounded-full border transition" data-target="input-ending" data-val="용기를 얻고 모두에게 따뜻한 사랑을 선물해요">따뜻한 사랑 선물</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Step 8: 8 Rich Drawing Styles Selection -->
+      <div class="bg-white rounded-3xl p-4 md:p-5 border-2 border-purple-200 shadow-sm">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-palette text-purple-600 text-lg"></i>
+            <h3 class="font-jua text-base md:text-lg text-slate-800">4단계: 그림 스타일 고르기 (8가지 마법 화풍)</h3>
+          </div>
+          <span class="text-xs text-purple-600 font-bold bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200 hidden sm:inline">
+            가장 마음에 드는 화풍 1개를 콕 눌러보세요!
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          
+          <!-- Style 1 -->
+          <button type="button" class="btn-style-choice active p-3 rounded-2xl border-2 border-purple-400 bg-purple-50 text-purple-900 font-bold flex flex-col items-center gap-1 shadow-sm transition" data-style="포근하고 따뜻한 수채화 동화책 일러스트">
+            <span class="text-2xl">🎨</span>
+            <span class="text-xs font-jua">따뜻한 수채화</span>
+            <span class="text-[10px] text-purple-600 font-normal">부드럽고 맑은 물감</span>
+          </button>
+
+          <!-- Style 2 -->
+          <button type="button" class="btn-style-choice p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-slate-700 font-bold flex flex-col items-center gap-1 transition" data-style="동글동글 귀엽고 앙증맞은 3D 클레이(점토) 애니메이션풍">
+            <span class="text-2xl">🧸</span>
+            <span class="text-xs font-jua">3D 클레이 점토</span>
+            <span class="text-[10px] text-slate-400 font-normal">만지고 싶은 입체감</span>
+          </button>
+
+          <!-- Style 3 -->
+          <button type="button" class="btn-style-choice p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-slate-700 font-bold flex flex-col items-center gap-1 transition" data-style="아기자기하고 따스한 손그림 색연필 일러스트">
+            <span class="text-2xl">🖍️</span>
+            <span class="text-xs font-jua">알록달록 색연필</span>
+            <span class="text-[10px] text-slate-400 font-normal">정감 있는 손그림</span>
+          </button>
+
+          <!-- Style 4 -->
+          <button type="button" class="btn-style-choice p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-slate-700 font-bold flex flex-col items-center gap-1 transition" data-style="신비롭고 영롱한 은하수 밤하늘 파스텔 일러스트">
+            <span class="text-2xl">✨</span>
+            <span class="text-xs font-jua">영롱한 파스텔</span>
+            <span class="text-[10px] text-slate-400 font-normal">꿈결 같은 반짝임</span>
+          </button>
+
+          <!-- Style 5 -->
+          <button type="button" class="btn-style-choice p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-slate-700 font-bold flex flex-col items-center gap-1 transition" data-style="따스한 바람과 풀내음이 느껴지는 감성 지브리 애니메이션 배경 수채화풍">
+            <span class="text-2xl">🍃</span>
+            <span class="text-xs font-jua">지브리 감성 애니</span>
+            <span class="text-[10px] text-slate-400 font-normal">초록 숲과 뭉게구름</span>
+          </button>
+
+          <!-- Style 6 -->
+          <button type="button" class="btn-style-choice p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-slate-700 font-bold flex flex-col items-center gap-1 transition" data-style="생동감 넘치고 표정이 풍부한 디즈니 픽사 3D 카툰 애니메이션풍">
+            <span class="text-2xl">🌟</span>
+            <span class="text-xs font-jua">3D 픽사 카툰</span>
+            <span class="text-[10px] text-slate-400 font-normal">영화 주인공 느낌</span>
+          </button>
+
+          <!-- Style 7 -->
+          <button type="button" class="btn-style-choice p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-slate-700 font-bold flex flex-col items-center gap-1 transition" data-style="색종이를 아기자기하게 가위로 오려 겹쳐 만든 따뜻한 페이퍼 컷아웃(종이 공예) 콜라주 아트">
+            <span class="text-2xl">✂️</span>
+            <span class="text-xs font-jua">종이 오리기 콜라주</span>
+            <span class="text-[10px] text-slate-400 font-normal">입체 종이 인형극</span>
+          </button>
+
+          <!-- Style 8 -->
+          <button type="button" class="btn-style-choice p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-slate-700 font-bold flex flex-col items-center gap-1 transition" data-style="귀엽고 통통 튀는 레트로 16비트 도트 픽셀 아트 비디오 게임풍">
+            <span class="text-2xl">👾</span>
+            <span class="text-xs font-jua">레트로 픽셀 도트</span>
+            <span class="text-[10px] text-slate-400 font-normal">모험 게임 그래픽</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Assembled Prompt & Execution Controls -->
+      <div class="bg-gradient-to-br from-amber-50 via-orange-50 to-purple-50 border-3 border-amber-300 rounded-3xl p-5 md:p-6 shadow-md">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">📜</span>
+            <div>
+              <h3 id="assembled-prompt-title" class="font-jua text-lg md:text-xl text-amber-900">완성된 마법의 주문서</h3>
+              <p id="assembled-prompt-subtitle" class="text-xs text-amber-700">제미나이에 그대로 복사해서 넣으면 완성됩니다!</p>
+            </div>
+          </div>
+          <span id="prompt-char-count" class="text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">
+            단어 조립 중...
+          </span>
+        </div>
+
+        <div class="relative bg-white/90 backdrop-blur-sm p-4 rounded-2xl border-2 border-amber-200 mb-4 min-h-[90px] flex items-center">
+          <p id="preview-final-prompt" class="text-slate-800 font-medium text-sm md:text-base leading-relaxed">
+            위의 단계별 상자에 생각나는 단어를 적어보세요. 마법 주문이 자동으로 멋지게 완성됩니다!
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+          <!-- Copy button -->
+          <button id="btn-copy-prompt" class="w-full sm:w-auto flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-jua text-base md:text-lg py-3.5 px-6 rounded-2xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 active:scale-95">
+            <i class="fa-solid fa-copy"></i>
+            <span id="btn-copy-text">마법 주문 가방에 담기 (복사하기)</span>
+          </button>
+
+          <!-- Gemini Storybook Link button -->
+          <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer"
+             id="btn-goto-gemini"
+             class="w-full sm:w-auto bg-white hover:bg-slate-50 text-amber-800 border-2 border-amber-300 font-jua text-base md:text-lg py-3.5 px-6 rounded-2xl shadow-sm transition flex items-center justify-center gap-2">
+            <img src="https://www.gstatic.com/lamda/images/gemini_aurora_thumbnail_4g_e74822ff0ca4259beb718.png" alt="Gemini" class="w-5 h-5 rounded-full" />
+            <span>제미나이 Storybook 열기</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Dynamic Weekly Submission Section (Adaptive to Week 1, Week 2~3, Week 4~5) -->
+      <div id="section-student-submission" class="bg-white rounded-3xl p-5 border-2 border-indigo-200 shadow-sm transition-all">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span id="submission-step-icon" class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </span>
+            <div>
+              <h3 id="submission-step-title" class="font-jua text-base md:text-lg text-slate-800">
+                1주차 미션: 내 주인공 캐릭터 파일 제출
+              </h3>
+              <p id="submission-step-desc" class="text-xs text-slate-500">
+                제미나이에서 완성한 첫 번째 주인공 사진과 소개를 등록하세요.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span id="badge-gdrive-sync-indicator" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <i class="fa-brands fa-google-drive"></i> 구글 드라이브 연동 준비
+            </span>
+            <span id="badge-submission-status" class="text-xs text-indigo-600 font-bold bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+              과제 미제출
+            </span>
+          </div>
+        </div>
+
+        <!-- Week 1 Form: Character image & description -->
+        <div id="form-week-1" class="submission-week-form space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">내 주인공 이름과 한 줄 매력 소개</label>
+            <input id="input-w1-intro" type="text" placeholder="예: 안경을 쓰고 도토리 가방을 맨 세상에서 가장 똑똑한 아기 다람쥐 또또"
+              class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-medium focus:border-indigo-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">주인공 사진 파일 (PNG, JPG)</label>
+            <div class="flex items-center gap-3">
+              <label class="cursor-pointer flex-1 flex flex-col items-center justify-center p-3 border-2 border-dashed border-amber-200 hover:border-amber-400 rounded-2xl bg-amber-50/40 hover:bg-amber-50 transition text-amber-800">
+                <i class="fa-solid fa-image text-xl mb-1 text-amber-500"></i>
+                <span class="text-xs font-bold" id="label-w1-file">주인공 이미지 파일 선택하기</span>
+                <input id="file-w1-input" type="file" accept="image/*" class="hidden" />
+              </label>
+              <div id="preview-box-w1" class="w-16 h-16 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden hidden">
+                <img id="img-preview-w1" src="" alt="주인공 미리보기" class="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Week 2~3 Form: Draft PDF/Image or Gemini Share Link -->
+        <div id="form-week-2" class="submission-week-form space-y-3 hidden">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">동화책 제목 및 전체 줄거리 요약</label>
+            <textarea id="input-w2-summary" rows="2" placeholder="예: 화정도서관의 비밀 책을 찾아 모험을 떠난 또또가 밤하늘 별빛 열쇠를 얻어 친구들을 구하는 이야기"
+              class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-medium focus:border-indigo-500 outline-none"></textarea>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">방법 A: 제미나이 Storybook 웹 링크(URL)</label>
+              <input id="input-w2-link" type="url" placeholder="https://gemini.google.com/share/..."
+                class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-mono focus:border-indigo-500 outline-none" />
+              <span class="text-[10px] text-slate-400 mt-1 block">💡 제미나이 우측 상단 '공유' 버튼을 눌러 복사한 링크를 넣으세요.</span>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">방법 B: 동화책 초안 파일 (PDF 또는 캡처 이미지)</label>
+              <label class="cursor-pointer flex flex-col items-center justify-center p-2.5 border-2 border-dashed border-indigo-200 hover:border-indigo-400 rounded-2xl bg-indigo-50/40 hover:bg-indigo-50 transition text-indigo-700">
+                <i class="fa-solid fa-file-pdf text-lg mb-0.5 text-indigo-500"></i>
+                <span class="text-xs font-bold" id="label-w2-file">PDF 또는 대표 이미지 선택</span>
+                <input id="file-w2-input" type="file" accept=".pdf,image/*" class="hidden" />
+              </label>
+              <span id="file-w2-name" class="text-[11px] text-indigo-600 font-bold truncate mt-1 block"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Week 4~5 Form: Final Book PDF / Link and Recitation Line -->
+        <div id="form-week-4" class="submission-week-form space-y-3 hidden">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">
+              🎤 꼬마 성우 낭독 문장 (발표회에서 내 목소리로 낭독할 가장 멋진 명대사)
+            </label>
+            <textarea id="input-w4-line" rows="2" placeholder="예: '친구들아, 포기하지 마! 우리에겐 별빛 지팡이가 있잖아!' 또또는 환하게 웃으며 밤하늘로 날아올랐어요."
+              class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-medium focus:border-indigo-500 outline-none"></textarea>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">최종 완성 동화책 PDF 파일</label>
+              <label class="cursor-pointer flex flex-col items-center justify-center p-2.5 border-2 border-dashed border-purple-200 hover:border-purple-400 rounded-2xl bg-purple-50/40 hover:bg-purple-50 transition text-purple-700">
+                <i class="fa-solid fa-file-arrow-up text-lg mb-0.5 text-purple-600"></i>
+                <span class="text-xs font-bold" id="label-w4-file">최종 동화책 PDF 파일 올리기</span>
+                <input id="file-w4-input" type="file" accept=".pdf" class="hidden" />
+              </label>
+              <span id="file-w4-name" class="text-[11px] text-purple-600 font-bold truncate mt-1 block"></span>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">온라인 동화책 링크 (북크리에이터 또는 캔바 URL)</label>
+              <input id="input-w4-link" type="url" placeholder="https://read.bookcreator.com/... 또는 캔바 링크"
+                class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-mono focus:border-indigo-500 outline-none" />
+              <span class="text-[10px] text-slate-400 mt-1 block">💡 PDF 대신 온라인 공유 링크를 제출해도 좋습니다.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button & Sync Notice -->
+        <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="text-[11px] text-slate-500 flex items-center gap-1.5">
+            <i class="fa-solid fa-folder-tree text-amber-500"></i>
+            <span>저장 위치: <strong class="text-slate-700">화정도서관 AI 동화책 만들기 / <span id="label-student-folder-target">01번_작가 1</span></strong></span>
+          </div>
+          <button id="btn-submit-weekly" type="button" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-jua text-sm md:text-base py-2.5 px-6 rounded-xl shadow-md transition flex items-center gap-2 active:scale-95">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span id="btn-submit-weekly-text">선생님 화면 & 구글 드라이브로 과제 전송하기</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- [MODE 2] 선생님 관제탑 (TEACHER DASHBOARD)      -->
+    <!-- ============================================== -->
+    <div id="view-teacher" class="hidden space-y-5">
+
+      <!-- Teacher Statistics & Filter Bar -->
+      <div class="bg-white rounded-3xl p-4 md:p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h2 class="text-lg md:text-xl font-jua text-slate-800">
+                화정도서관 실시간 15명 창작 관제탑
+              </h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              아이들의 키보드 타이핑이 0.5초마다 실시간으로 업데이트됩니다. 카드를 누르면 빔프로젝터 스포트라이트가 열립니다.
+            </p>
+          </div>
+
+          <!-- Status Counters & Control Buttons -->
+          <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+            <div class="bg-slate-100 text-slate-600 px-2.5 py-1.5 rounded-xl border border-slate-200">
+              대기: <strong id="count-idle">15</strong>
+            </div>
+            <div class="bg-amber-50 text-amber-700 px-2.5 py-1.5 rounded-xl border border-amber-200">
+              타이핑중: <strong id="count-writing">0</strong>
+            </div>
+            <div class="bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl border border-emerald-200">
+              주문완성: <strong id="count-ready">0</strong>
+            </div>
+            <div class="bg-indigo-50 text-indigo-700 px-2.5 py-1.5 rounded-xl border border-indigo-200">
+              과제제출: <strong id="count-done">0</strong>
+            </div>
+            <button id="btn-demo-fill" class="bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs px-3 py-1.5 rounded-xl border border-purple-300 font-bold transition flex items-center gap-1">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>5명 샘플 채우기</span>
+            </button>
+            <button id="btn-open-gdrive-settings" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs px-3 py-1.5 rounded-xl border border-emerald-300 font-bold transition flex items-center gap-1" title="구글 드라이브 자동 저장 폴더 연동 설정">
+              <i class="fa-brands fa-google-drive text-emerald-600"></i>
+              <span>드라이브 연동</span>
+            </button>
+            <button id="btn-open-pin-change" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-xl border border-slate-300 font-bold transition flex items-center gap-1" title="선생님 인증 비밀번호를 변경합니다">
+              <i class="fa-solid fa-key text-amber-500"></i>
+              <span>비밀번호 변경</span>
+            </button>
+            <button id="btn-lock-teacher" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs px-3 py-1.5 rounded-xl border border-rose-200 font-bold transition flex items-center gap-1" title="관제탑을 잠그고 학생 모드로 돌아갑니다">
+              <i class="fa-solid fa-lock"></i>
+              <span>관제탑 잠금</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Teacher Remote Curriculum Controller Bar -->
+        <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-amber-50 border border-indigo-100 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs shadow-sm">
+              <i class="fa-solid fa-tower-broadcast"></i>
+            </span>
+            <div>
+              <h3 class="font-jua text-sm text-indigo-950">수업 주차 원격 제어 (선생님 전용 스위치)</h3>
+              <p class="text-[11px] text-indigo-600">선택한 주차로 15명 학생들의 화면이 즉시 전환되고 해당 단계로 고정됩니다.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button id="btn-teacher-set-week1" class="teacher-curriculum-btn active px-3 py-1.5 rounded-xl text-xs font-jua bg-indigo-600 text-white shadow-sm transition">
+              🐻 1주차만 열기 (캐릭터)
+            </button>
+            <button id="btn-teacher-set-week2" class="teacher-curriculum-btn px-3 py-1.5 rounded-xl text-xs font-jua bg-white hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition">
+              📖 2~3주차 열기 (전체 주문서)
+            </button>
+            <button id="btn-teacher-set-week4" class="teacher-curriculum-btn px-3 py-1.5 rounded-xl text-xs font-jua bg-white hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition">
+              🎤 4~5주차 열기 (발표 및 낭독)
+            </button>
+            <button id="btn-teacher-set-free" class="teacher-curriculum-btn px-3 py-1.5 rounded-xl text-xs font-jua bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 transition" title="학생들이 원하는 탭을 자유롭게 눌러볼 수 있도록 잠금을 풉니다">
+              🔓 학생 자유 선택 허용
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 15 Students Grid Cards -->
+      <div id="teacher-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <!-- 15 Student Cards generated dynamically -->
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Spotlight Presentation Modal (Beam Projector Screen) -->
+  <div id="spotlight-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border-4 border-amber-300 overflow-hidden transform transition-all">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 p-4 md:p-5 text-white flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center text-xl font-jua">
+            <span id="spotlight-seat">1번</span>
+          </div>
+          <div>
+            <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">✨ 오늘의 꼬마 작가 스포트라이트</span>
+            <h2 id="spotlight-name" class="text-xl md:text-2xl font-jua">민우 작가님의 상상 동화</h2>
+          </div>
+        </div>
+        <button id="btn-close-spotlight" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center text-base transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-5 md:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+        <!-- Prompt Box -->
+        <div>
+          <h4 class="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-scroll"></i> 마법의 동화 주문서 (프롬프트)
+          </h4>
+          <div class="bg-amber-50 p-3.5 rounded-2xl border-2 border-amber-200">
+            <p id="spotlight-prompt" class="font-jua text-base md:text-lg text-slate-800 leading-relaxed">
+              -
+            </p>
+          </div>
+        </div>
+
+        <!-- 7 Steps Breakdown -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="text-[10px] font-bold text-slate-400 block">주인공</span>
+            <span id="spotlight-hero" class="font-bold text-slate-700 truncate block">-</span>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="text-[10px] font-bold text-slate-400 block">특징/옷</span>
+            <span id="spotlight-traits" class="font-bold text-slate-700 truncate block">-</span>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="text-[10px] font-bold text-slate-400 block">보물/소지품</span>
+            <span id="spotlight-item" class="font-bold text-slate-700 truncate block">-</span>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="text-[10px] font-bold text-slate-400 block">장소</span>
+            <span id="spotlight-place" class="font-bold text-slate-700 truncate block">-</span>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="text-[10px] font-bold text-slate-400 block">날씨/시간</span>
+            <span id="spotlight-weather" class="font-bold text-slate-700 truncate block">-</span>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="text-[10px] font-bold text-slate-400 block">모험 사건</span>
+            <span id="spotlight-mission" class="font-bold text-slate-700 truncate block">-</span>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="text-[10px] font-bold text-slate-400 block">행복한 결말</span>
+            <span id="spotlight-ending" class="font-bold text-slate-700 truncate block">-</span>
+          </div>
+          <div class="p-2 rounded-xl bg-purple-50 border border-purple-200">
+            <span class="text-[10px] font-bold text-purple-400 block">그림 화풍</span>
+            <span id="spotlight-style" class="font-bold text-purple-700 truncate block">-</span>
+          </div>
+        </div>
+
+        <!-- Weekly Submissions Viewer (Week 1, Week 2~3, Week 4~5) -->
+        <div class="border-t border-slate-100 pt-3 space-y-3">
+          <h4 class="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-folder-open"></i> 주차별 제출 작품 및 발표 자료
+          </h4>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <!-- 1주차 캐릭터 제출본 -->
+            <div class="p-3 rounded-2xl bg-amber-50/50 border border-amber-200">
+              <span class="text-[11px] font-bold text-amber-800 block mb-1">🐻 1주차: 주인공 캐릭터</span>
+              <div id="spotlight-w1-content" class="text-xs text-slate-600">
+                <span class="text-slate-400">제출 내역 없음</span>
+              </div>
+            </div>
+
+            <!-- 2~3주차 동화 초안 제출본 -->
+            <div class="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-200">
+              <span class="text-[11px] font-bold text-emerald-800 block mb-1">📖 2~3주차: 동화책 초안</span>
+              <div id="spotlight-w2-content" class="text-xs text-slate-600">
+                <span class="text-slate-400">제출 내역 없음</span>
+              </div>
+            </div>
+
+            <!-- 4~5주차 최종 및 낭독 문장 -->
+            <div class="p-3 rounded-2xl bg-indigo-50/50 border border-indigo-200">
+              <span class="text-[11px] font-bold text-indigo-800 block mb-1">🎤 4~5주차: 낭독 & 최종본</span>
+              <div id="spotlight-w4-content" class="text-xs text-slate-600">
+                <span class="text-slate-400">제출 내역 없음</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Cheer Button -->
+      <div class="p-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <span class="text-xs text-slate-500">
+          💡 큰 화면으로 친구의 기발한 상상을 칭찬하고 응원해 주세요!
+        </span>
+        <button id="btn-cheer-spotlight" class="bg-amber-500 hover:bg-amber-600 text-white font-jua px-4 py-2 rounded-xl text-xs md:text-sm shadow flex items-center gap-1.5 active:scale-95 transition">
+          <i class="fa-solid fa-hands-clapping"></i>
+          <span>와~ 멋져요! (박수 치기)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Authentication PIN Modal (Default PIN hint removed) -->
+  <div id="teacher-auth-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div id="teacher-auth-card" class="bg-white rounded-3xl max-w-sm w-full shadow-2xl border-4 border-amber-300 overflow-hidden transform transition-all p-6 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 text-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+        <i class="fa-solid fa-key animate-bounce"></i>
+      </div>
+      <h3 class="font-jua text-xl text-slate-800 mb-1">선생님 전용 관제탑 인증</h3>
+      <p class="text-xs text-slate-500 mb-4">
+        실시간 수업 관제탑에 입장하려면 선생님 비밀번호를 입력해주세요.
+      </p>
+
+      <div class="space-y-3">
+        <div class="relative">
+          <input id="teacher-password-input" type="password" maxlength="12" placeholder="비밀번호 입력"
+            class="w-full text-center tracking-widest font-mono text-lg py-2.5 px-3 rounded-2xl border-2 border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition" />
+        </div>
+        <p id="teacher-auth-error" class="text-[11px] text-rose-500 font-bold hidden flex items-center justify-center gap-1">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>비밀번호가 올바르지 않습니다. 다시 입력해주세요!</span>
+        </p>
+
+        <div class="flex items-center gap-2 pt-1">
+          <button id="btn-cancel-teacher-auth" type="button" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
+            취소 (학생 모드 유지)
+          </button>
+          <button id="btn-confirm-teacher-auth" type="button" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-jua shadow transition active:scale-95">
+            관제탑 열기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Drive Integration & Webhook Setup Modal -->
+  <div id="teacher-gdrive-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl border-4 border-emerald-300 overflow-hidden p-6 text-left max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl">
+            <i class="fa-brands fa-google-drive"></i>
+          </span>
+          <div>
+            <h3 class="font-jua text-lg text-slate-800">구글 드라이브 자동 폴더 연동 설정</h3>
+            <p class="text-xs text-slate-500">화정도서관 AI 동화책 만들기 / [좌석]번_[이름] / [주차] 자동 정리</p>
+          </div>
+        </div>
+        <button id="btn-close-gdrive-modal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-xs text-slate-600">
+        <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200">
+          <h4 class="font-bold text-emerald-900 mb-1 flex items-center gap-1">
+            <i class="fa-solid fa-circle-info text-emerald-600"></i> 자동 폴더 구조 안내
+          </h4>
+          <p class="text-[11px] leading-relaxed text-emerald-800">
+            학생이 과제를 제출하면 선생님의 구글 드라이브에 아래 구조로 폴더가 즉시 자동 생성되고 파일 및 링크가 차곡차곡 저장됩니다:
+          </p>
+          <div class="mt-2 font-mono text-[11px] bg-white p-2.5 rounded-xl border border-emerald-200 text-slate-700 space-y-0.5">
+            <div>📁 화정도서관 AI 동화책 만들기</div>
+            <div class="pl-4">└── 📁 01번_김민우 작가/</div>
+            <div class="pl-8">├── 📁 1주차_주인공캐릭터/ (캐릭터 이미지 & 소개)</div>
+            <div class="pl-8">├── 📁 2-3주차_동화초안/ (Storybook 링크 & 초안 PDF)</div>
+            <div class="pl-8">└── 📁 4-5주차_최종동화책/ (최종 완성본 PDF & 낭독 대사)</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">
+            구글 앱스 스크립트(Google Apps Script) 웹 앱 URL
+          </label>
+          <div class="flex items-center gap-2">
+            <input id="input-gdrive-webhook-url" type="url" placeholder="https://script.google.com/macros/s/.../exec"
+              class="flex-1 p-2.5 border border-slate-300 rounded-xl font-mono text-xs focus:border-emerald-500 outline-none" />
+            <button id="btn-save-gdrive-webhook" class="bg-emerald-600 hover:bg-emerald-700 text-white font-jua px-4 py-2.5 rounded-xl transition whitespace-nowrap">
+              URL 저장
+            </button>
+          </div>
+          <span class="text-[10px] text-slate-400 mt-1 block">
+            * 웹 앱 URL을 등록하면 학생들이 제출할 때마다 선생님 구글 드라이브로 다이렉트 전송됩니다.
+          </span>
+        </div>
+
+        <!-- 1-Minute Setup Guide Accordion -->
+        <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800">🛠️ 1분 간편 연동 스크립트 복사하기</span>
+            <button id="btn-copy-gas-code" class="text-[11px] font-bold text-emerald-700 bg-white border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-50 transition flex items-center gap-1">
+              <i class="fa-solid fa-copy"></i>
+              <span>스크립트 코드 복사</span>
+            </button>
+          </div>
+          <ol class="list-decimal list-inside text-[11px] text-slate-500 space-y-1">
+            <li>Google Drive에서 <strong>[새로 만들기 ➔ 더보기 ➔ Google Apps Script]</strong>를 엽니다.</li>
+            <li>기존 코드를 지우고 위 복사 버튼으로 복사한 스크립트를 붙여넣은 후 저장합니다.</li>
+            <li>우측 상단 <strong>[배포 ➔ 새 배포 ➔ 웹 앱]</strong> 선택 (액세스: <strong>'모든 사용자'</strong> 설정).</li>
+            <li>생성된 <strong>웹 앱 URL</strong>을 위 입력창에 붙여넣고 저장하면 연동 완료!</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+        <span class="text-[11px] text-slate-400">설정 없이도 브라우저 관제탑 내에서는 모든 파일이 실시간 정상 작동합니다.</span>
+        <button id="btn-done-gdrive-modal" class="bg-slate-800 hover:bg-slate-900 text-white font-jua text-xs px-4 py-2 rounded-xl transition">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Change PIN Modal -->
+  <div id="teacher-pin-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full shadow-2xl border-4 border-indigo-300 overflow-hidden p-6 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 text-xl flex items-center justify-center mx-auto mb-2 shadow-inner">
+        <i class="fa-solid fa-key"></i>
+      </div>
+      <h3 class="font-jua text-lg text-slate-800 mb-1">선생님 비밀번호 변경</h3>
+      <p class="text-xs text-slate-500 mb-4">
+        관제탑에 접속할 때 사용할 새 비밀번호를 입력해주세요.
+      </p>
+
+      <div class="space-y-2.5 text-left">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 mb-1">현재 비밀번호</label>
+          <input id="input-pin-current" type="password" maxlength="12" placeholder="현재 비밀번호 (기본: 7777)"
+            class="w-full text-sm font-mono p-2.5 rounded-xl border border-slate-300 focus:border-indigo-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 mb-1">새 비밀번호 (4~12자리)</label>
+          <input id="input-pin-new" type="password" maxlength="12" placeholder="새 비밀번호 입력"
+            class="w-full text-sm font-mono p-2.5 rounded-xl border border-slate-300 focus:border-indigo-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 mb-1">새 비밀번호 확인</label>
+          <input id="input-pin-confirm" type="password" maxlength="12" placeholder="새 비밀번호 다시 입력"
+            class="w-full text-sm font-mono p-2.5 rounded-xl border border-slate-300 focus:border-indigo-500 outline-none" />
+        </div>
+        <p id="pin-change-error" class="text-[11px] text-rose-500 font-bold hidden flex items-center gap-1 pt-1">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span id="pin-change-error-text">입력한 정보를 다시 확인해주세요.</span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2 pt-4">
+        <button id="btn-cancel-pin-change" type="button" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
+          취소
+        </button>
+        <button id="btn-save-new-pin" type="button" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-jua shadow transition active:scale-95">
+          변경 완료
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Remote Edit Student Name & Lock Modal -->
+  <div id="teacher-student-edit-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full shadow-2xl border-4 border-amber-300 overflow-hidden p-6 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 text-xl flex items-center justify-center mx-auto mb-2 shadow-inner">
+        <i class="fa-solid fa-user-pen"></i>
+      </div>
+      <h3 class="font-jua text-lg text-slate-800 mb-1"><span id="edit-modal-seat-title">1번 좌석</span> 학생 정보 관리</h3>
+      <p class="text-xs text-slate-500 mb-4">
+        학생의 작가 이름을 수정하거나, 잠금을 풀어 학생이 직접 다시 입력하도록 할 수 있습니다.
+      </p>
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 mb-1">작가 이름(별명)</label>
+          <input id="edit-modal-student-name" type="text" maxlength="10" placeholder="예: 김민우 작가"
+            class="w-full text-sm font-bold p-2.5 rounded-xl border border-slate-300 focus:border-amber-500 outline-none" />
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex items-center justify-between">
+          <div>
+            <span class="font-bold text-slate-700 block">좌석 잠금 상태</span>
+            <span id="edit-modal-lock-desc" class="text-[11px] text-slate-500">학생 화면에서 임의 수정 불가</span>
+          </div>
+          <button id="btn-toggle-seat-lock" type="button" class="px-3 py-1.5 rounded-lg text-xs font-jua bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-200 transition">
+            잠금 해제하기
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-4">
+        <button id="btn-cancel-student-edit" type="button" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
+          닫기
+        </button>
+        <button id="btn-save-student-edit" type="button" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-jua shadow transition active:scale-95">
+          저장 & 동기화
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-700 font-bold text-xs md:text-sm">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-amber-400 text-lg"></i>
+    <span id="toast-msg">알림 메시지</span>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /* Web Audio synthesizer */
+    let audioCtx = null;
+    function playSound(type = 'click') {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'type') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(340 + Math.random() * 150, now);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        } else if (type === 'magic') {
+          [523, 659, 784, 1046, 1318].forEach((freq, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + i * 0.06);
+            g.gain.setValueAtTime(0.1, now + i * 0.06);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.22);
+            o.start(now + i * 0.06);
+            o.stop(now + i * 0.06 + 0.22);
+          });
+        } else if (type === 'fanfare') {
+          [440, 554, 659, 880].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'sine';
+            o.frequency.setValueAtTime(freq, now + idx * 0.09);
+            g.gain.setValueAtTime(0.14, now + idx * 0.09);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.4);
+            o.start(now + idx * 0.09);
+            o.stop(now + idx * 0.09 + 0.4);
+          });
+        }
+      } catch (e) {}
+    }
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'hwajeong-storybook-hub';
+    const rawFirebaseConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    let db = null;
+    let auth = null;
+    let broadcastChannel = null;
+
+    const PIN_STORAGE_KEY = 'hwajeong_teacher_pin_code';
+    function getStoredTeacherPin() {
+      return localStorage.getItem(PIN_STORAGE_KEY) || '7777';
+    }
+    function setStoredTeacherPin(newPin) {
+      localStorage.setItem(PIN_STORAGE_KEY, newPin);
+    }
+
+    const GDRIVE_WEBHOOK_KEY = 'hwajeong_gdrive_webhook_url';
+    function getStoredGdriveWebhook() {
+      return localStorage.getItem(GDRIVE_WEBHOOK_KEY) || '';
+    }
+    function setStoredGdriveWebhook(url) {
+      localStorage.setItem(GDRIVE_WEBHOOK_KEY, url);
+    }
+
+    let globalCurriculumState = {
+      week: 'week-1',
+      allowStudentSwitch: false
+    };
+
+    const studentsData = {};
+    for (let i = 1; i <= 15; i++) {
+      studentsData[i] = {
+        seat: i,
+        name: `작가 ${i}`,
+        isLocked: false,
+        hero: '',
+        traits: '',
+        item: '',
+        place: '',
+        weather: '',
+        mission: '',
+        ending: '',
+        style: '포근하고 따뜻한 수채화 동화책 일러스트',
+        prompt: '',
+        status: 'idle',
+        submissions: {
+          'week-1': { intro: '', fileData: '', fileName: '', timestamp: 0 },
+          'week-2': { summary: '', linkUrl: '', fileData: '', fileName: '', timestamp: 0 },
+          'week-4': { recitationLine: '', pdfData: '', pdfName: '', linkUrl: '', timestamp: 0 }
+        },
+        updatedAt: Date.now()
+      };
+    }
+
+    let currentSeat = 1;
+    let currentStyle = '포근하고 따뜻한 수채화 동화책 일러스트';
+    let currentWeekMode = 'week-1';
+    let debounceTimer = null;
+    let isTeacherUnlocked = false;
+    let editingSeatTarget = null;
+
+    /* Google Apps Script template code for teacher copy */
+    const GOOGLE_APPS_SCRIPT_TEMPLATE = `// [화정도서관 AI 동화책 만들기] Google Drive 자동 폴더 정리 스크립트
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var rootFolderName = "화정도서관 AI 동화책 만들기";
+    var rootFolder;
+    var rIter = DriveApp.getFoldersByName(rootFolderName);
+    if (rIter.hasNext()) {
+      rootFolder = rIter.next();
+    } else {
+      rootFolder = DriveApp.createFolder(rootFolderName);
+    }
+
+    var seatPadded = (data.seat < 10 ? "0" : "") + data.seat;
+    var studentFolderName = seatPadded + "번_" + (data.studentName || "작가 " + data.seat);
+    var studentFolder;
+    var sIter = rootFolder.getFoldersByName(studentFolderName);
+    if (sIter.hasNext()) {
+      studentFolder = sIter.next();
+    } else {
+      studentFolder = rootFolder.createFolder(studentFolderName);
+    }
+
+    var weekFolderName = data.weekLabel || "과제";
+    var weekFolder;
+    var wIter = studentFolder.getFoldersByName(weekFolderName);
+    if (wIter.hasNext()) {
+      weekFolder = wIter.next();
+    } else {
+      weekFolder = studentFolder.createFolder(weekFolderName);
+    }
+
+    if (data.fileBase64 && data.fileName) {
+      var base64Part = data.fileBase64.indexOf(",") > -1 ? data.fileBase64.split(",")[1] : data.fileBase64;
+      var decoded = Utilities.base64Decode(base64Part);
+      var blob = Utilities.newBlob(decoded, data.mimeType || "application/octet-stream", data.fileName);
+      weekFolder.createFile(blob);
+    }
+
+    if (data.note || data.linkUrl) {
+      var txtContent = "=== 화정도서관 AI 동화책 만들기 과제 기록 ===\\n"
+        + "좌석: " + data.seat + "번\\n"
+        + "작가 이름: " + data.studentName + "\\n"
+        + "제출 차시: " + weekFolderName + "\\n"
+        + "제출 일시: " + new Date().toLocaleString("ko-KR", {timeZone: "Asia/Seoul"}) + "\\n\\n";
+      if (data.linkUrl) txtContent += "[작품 웹 링크]\\n" + data.linkUrl + "\\n\\n";
+      if (data.note) txtContent += "[작성 내용 / 낭독 문장]\\n" + data.note + "\\n";
+
+      weekFolder.createFile(weekFolderName + "_제출기록.txt", txtContent);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+    async function uploadToGoogleDrive(payload) {
+      const webhookUrl = getStoredGdriveWebhook();
+      if (!webhookUrl) return { skipped: true };
+
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        return { success: true };
+      } catch (err) {
+        console.warn('Google Drive webhook sync warning:', err);
+        return { error: err };
+      }
+    }
+
+    function buildPrompt() {
+      const hero = document.getElementById('input-hero')?.value.trim() || '';
+      const traits = document.getElementById('input-traits')?.value.trim() || '';
+      const item = document.getElementById('input-item')?.value.trim() || '';
+      const place = document.getElementById('input-place')?.value.trim() || '';
+      const weather = document.getElementById('input-weather')?.value.trim() || '';
+      const mission = document.getElementById('input-mission')?.value.trim() || '';
+      const ending = document.getElementById('input-ending')?.value.trim() || '';
+
+      if (currentWeekMode === 'week-1') {
+        if (!hero && !traits && !item) {
+          return "위의 1-1, 1-2, 1-3번 상자에 내가 좋아하는 주인공의 정체와 옷, 소지품을 적어보세요. 내 주인공 캐릭터 카드가 완성됩니다!";
+        }
+        let charPrompt = `초등학교 저학년 어린이 동화책의 주인공 캐릭터 디자인입니다. `;
+        if (hero) charPrompt += `주인공은 [${hero}]이며, `;
+        if (traits) charPrompt += `외모는 [${traits}] 특징을 가지고 있습니다. `;
+        if (item) charPrompt += `소중히 지니고 다니는 보물은 [${item}]입니다. `;
+        charPrompt += `정면과 측면 모습이 밝고 사랑스럽게 표현된 단독 캐릭터 시트를 그려주세요. `;
+        charPrompt += `그림 스타일은 '${currentStyle}'로 그려주세요.`;
+        return charPrompt;
+      }
+
+      if (!hero && !place && !mission) {
+        return "상자에 단어들을 차근차근 적어보세요. 제미나이 Storybook 젬에 바로 붙여넣는 마법의 주문서가 완성됩니다!";
+      }
+
+      let storyPrompt = "";
+      if (traits) storyPrompt += `${traits} 특징을 가진 `;
+      if (hero) storyPrompt += `[${hero}] 주인공이 `;
+      else storyPrompt += `귀여운 주인공이 `;
+
+      if (item) storyPrompt += `소중한 [${item}]을(를) 품에 안고, `;
+      if (place) storyPrompt += `[${place}]에서 `;
+      if (weather) storyPrompt += `(${weather} 시간대 배경), `;
+
+      if (mission) storyPrompt += `${mission} 모험을 떠납니다. `;
+      else storyPrompt += `신비로운 마법 모험을 떠납니다. `;
+
+      if (ending) storyPrompt += `이야기의 끝은 ${ending} 따뜻하고 감동적인 마무리입니다. `;
+
+      storyPrompt += `초등학교 저학년을 위한 5~8장면짜리 동화책(Storybook)을 만들어주세요. `;
+      storyPrompt += `모든 장면의 그림 스타일은 일관되게 '${currentStyle}'로 그려주세요.`;
+
+      return storyPrompt;
+    }
+
+    function updateStudentPromptPreview() {
+      const prompt = buildPrompt();
+      const previewEl = document.getElementById('preview-final-prompt');
+      const countEl = document.getElementById('prompt-char-count');
+      if (previewEl) previewEl.innerText = prompt;
+      if (countEl) countEl.innerText = `${prompt.length}글자 조립됨`;
+
+      const hero = document.getElementById('input-hero')?.value.trim() || '';
+      const name = document.getElementById('student-name-input')?.value.trim() || `작가 ${currentSeat}`;
+
+      let status = 'idle';
+      if (hero || document.getElementById('input-place')?.value.trim()) {
+        status = 'writing';
+      }
+      if (hero && (document.getElementById('input-traits')?.value.trim() || document.getElementById('input-mission')?.value.trim())) {
+        status = 'ready';
+      }
+
+      const sub = studentsData[currentSeat]?.submissions;
+      if (sub && (sub['week-1']?.fileData || sub['week-2']?.linkUrl || sub['week-2']?.fileData || sub['week-4']?.pdfData || sub['week-4']?.linkUrl)) {
+        status = 'done';
+      }
+
+      studentsData[currentSeat] = {
+        ...studentsData[currentSeat],
+        name: name,
+        hero: hero,
+        traits: document.getElementById('input-traits')?.value.trim() || '',
+        item: document.getElementById('input-item')?.value.trim() || '',
+        place: document.getElementById('input-place')?.value.trim() || '',
+        weather: document.getElementById('input-weather')?.value.trim() || '',
+        mission: document.getElementById('input-mission')?.value.trim() || '',
+        ending: document.getElementById('input-ending')?.value.trim() || '',
+        style: currentStyle,
+        prompt: prompt,
+        status: status,
+        updatedAt: Date.now()
+      };
+
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        syncStudentData(currentSeat);
+      }, 400);
+    }
+
+    function updateStudentLockUI() {
+      const s = studentsData[currentSeat];
+      const seatSelect = document.getElementById('student-seat-select');
+      const nameInput = document.getElementById('student-name-input');
+      const btnLock = document.getElementById('btn-lock-name');
+      const badgeLocked = document.getElementById('badge-name-locked');
+
+      if (s && s.isLocked) {
+        if (seatSelect) seatSelect.disabled = true;
+        if (nameInput) nameInput.disabled = true;
+        if (btnLock) btnLock.classList.add('hidden');
+        if (badgeLocked) {
+          badgeLocked.classList.remove('hidden');
+          badgeLocked.classList.add('flex');
+        }
+      } else {
+        if (seatSelect) seatSelect.disabled = false;
+        if (nameInput) nameInput.disabled = false;
+        if (btnLock) btnLock.classList.remove('hidden');
+        if (badgeLocked) {
+          badgeLocked.classList.add('hidden');
+          badgeLocked.classList.remove('flex');
+        }
+      }
+    }
+
+    function syncStudentData(seatNum) {
+      try {
+        localStorage.setItem(`hwajeong_student_${seatNum}`, JSON.stringify(studentsData[seatNum]));
+      } catch (e) {}
+
+      if (broadcastChannel) {
+        try {
+          broadcastChannel.postMessage({
+            type: 'STUDENT_UPDATE',
+            seat: seatNum,
+            data: studentsData[seatNum]
+          });
+        } catch (e) {}
+      }
+
+      if (db) {
+        try {
+          const studentDocRef = doc(db, 'artifacts', appId, 'students', `seat_${seatNum}`);
+          setDoc(studentDocRef, studentsData[seatNum], { merge: true });
+        } catch (err) {
+          console.warn('Firebase student sync warning:', err);
+        }
+      }
+
+      renderTeacherCards();
+      updateStats();
+    }
+
+    function broadcastCurriculumControl(week, allowStudentSwitch) {
+      globalCurriculumState.week = week;
+      globalCurriculumState.allowStudentSwitch = allowStudentSwitch;
+
+      try {
+        localStorage.setItem('hwajeong_curriculum_state', JSON.stringify(globalCurriculumState));
+      } catch (e) {}
+
+      if (broadcastChannel) {
+        try {
+          broadcastChannel.postMessage({
+            type: 'CURRICULUM_CONTROL',
+            curriculum: globalCurriculumState
+          });
+        } catch (e) {}
+      }
+
+      if (db) {
+        try {
+          const configDocRef = doc(db, 'artifacts', appId, 'config', 'curriculum');
+          setDoc(configDocRef, globalCurriculumState, { merge: true });
+        } catch (err) {
+          console.warn('Firebase curriculum sync warning:', err);
+        }
+      }
+    }
+
+    function renderWeeklySubmissionUI(week) {
+      const formW1 = document.getElementById('form-week-1');
+      const formW2 = document.getElementById('form-week-2');
+      const formW4 = document.getElementById('form-week-4');
+      const titleEl = document.getElementById('submission-step-title');
+      const descEl = document.getElementById('submission-step-desc');
+      const iconEl = document.getElementById('submission-step-icon');
+      const btnText = document.getElementById('btn-submit-weekly-text');
+      const folderTarget = document.getElementById('label-student-folder-target');
+      const gdriveIndicator = document.getElementById('badge-gdrive-sync-indicator');
+
+      const s = studentsData[currentSeat];
+      const sName = s?.name || `작가 ${currentSeat}`;
+      const seatPadded = (currentSeat < 10 ? '0' : '') + currentSeat;
+      if (folderTarget) folderTarget.innerText = `${seatPadded}번_${sName}`;
+
+      const hasGdrive = Boolean(getStoredGdriveWebhook());
+      if (gdriveIndicator) {
+        if (hasGdrive) {
+          gdriveIndicator.className = 'text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1';
+          gdriveIndicator.innerHTML = '<i class="fa-brands fa-google-drive text-emerald-600"></i> 드라이브 자동 저장 연결됨';
+        } else {
+          gdriveIndicator.className = 'text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full flex items-center gap-1';
+          gdriveIndicator.innerHTML = '<i class="fa-solid fa-hard-drive"></i> 로컬 저장 모드';
+        }
+      }
+
+      [formW1, formW2, formW4].forEach(f => {
+        if (f) f.classList.add('hidden');
+      });
+
+      const statusBadge = document.getElementById('badge-submission-status');
+      const currentSub = s?.submissions?.[week];
+      const isDone = currentSub && (currentSub.fileData || currentSub.linkUrl || currentSub.intro || currentSub.recitationLine);
+
+      if (statusBadge) {
+        if (isDone) {
+          statusBadge.className = 'text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200';
+          statusBadge.innerText = '✅ 과제 제출 완료';
+        } else {
+          statusBadge.className = 'text-xs text-amber-700 font-bold bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200';
+          statusBadge.innerText = '⏳ 과제 작성 중';
+        }
+      }
+
+      if (week === 'week-1') {
+        if (formW1) formW1.classList.remove('hidden');
+        if (titleEl) titleEl.innerText = "🐻 1주차 미션: 내 주인공 캐릭터 파일 제출";
+        if (descEl) descEl.innerText = "제미나이에서 완성한 첫 번째 주인공 사진과 소개를 등록하세요.";
+        if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>';
+        if (btnText) btnText.innerText = "선생님 화면 & 구글 드라이브로 1주차 캐릭터 전송";
+        const introInput = document.getElementById('input-w1-intro');
+        if (introInput) introInput.value = currentSub?.intro || '';
+      } else if (week === 'week-2') {
+        if (formW2) formW2.classList.remove('hidden');
+        if (titleEl) titleEl.innerText = "📖 2~3주차 미션: 제미나이 Storybook 동화 초안 제출";
+        if (descEl) descEl.innerText = "제미나이 공유 링크 또는 초안 파일(PDF/이미지)을 등록하세요.";
+        if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-book-open"></i>';
+        if (btnText) btnText.innerText = "선생님 화면 & 구글 드라이브로 2~3주차 초안 전송";
+        const summaryInput = document.getElementById('input-w2-summary');
+        const linkInput = document.getElementById('input-w2-link');
+        if (summaryInput) summaryInput.value = currentSub?.summary || '';
+        if (linkInput) linkInput.value = currentSub?.linkUrl || '';
+      } else {
+        if (formW4) formW4.classList.remove('hidden');
+        if (titleEl) titleEl.innerText = "🎤 4~5주차 미션: 최종 완성된 동화책 & 낭독 발표 등록";
+        if (descEl) descEl.innerText = "최종 동화책 PDF 파일/링크와 낭독할 명대사를 등록해 발표를 준비하세요.";
+        if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>';
+        if (btnText) btnText.innerText = "선생님 화면 & 구글 드라이브로 최종 완성본 전송";
+        const lineInput = document.getElementById('input-w4-line');
+        const link4Input = document.getElementById('input-w4-link');
+        if (lineInput) lineInput.value = currentSub?.recitationLine || '';
+        if (link4Input) link4Input.value = currentSub?.linkUrl || '';
+      }
+    }
+
+    function renderTeacherCards() {
+      const grid = document.getElementById('teacher-cards-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      for (let i = 1; i <= 15; i++) {
+        const s = studentsData[i];
+        const card = document.createElement('div');
+        
+        let statusBadge = '';
+        let borderClass = 'border-slate-200';
+        let bgClass = 'bg-white';
+
+        if (s.status === 'done') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700">🔵 과제 등록</span>';
+          borderClass = 'border-indigo-300 shadow-md';
+          bgClass = 'bg-indigo-50/20';
+        } else if (s.status === 'ready') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">🟢 주문 완성</span>';
+          borderClass = 'border-emerald-300 shadow-sm';
+        } else if (s.status === 'writing') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 animate-pulse">🟡 적는 중...</span>';
+          borderClass = 'border-amber-300';
+        } else {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">⚪ 대기 중</span>';
+        }
+
+        const lockBadge = s.isLocked
+          ? '<span class="text-[10px] text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded-md flex items-center gap-0.5"><i class="fa-solid fa-lock text-[9px]"></i> 확정</span>'
+          : '<span class="text-[10px] text-slate-400 font-normal">미확정</span>';
+
+        const sub = s.submissions || {};
+        const w1Done = Boolean(sub['week-1']?.fileData || sub['week-1']?.intro);
+        const w2Done = Boolean(sub['week-2']?.linkUrl || sub['week-2']?.fileData);
+        const w4Done = Boolean(sub['week-4']?.pdfData || sub['week-4']?.linkUrl || sub['week-4']?.recitationLine);
+
+        const subPills = `
+          <div class="flex items-center gap-1 mt-1 text-[9px] font-bold">
+            <span class="px-1.5 py-0.5 rounded ${w1Done ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-400'}">1주:${w1Done ? '🐻완료' : '미제출'}</span>
+            <span class="px-1.5 py-0.5 rounded ${w2Done ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-400'}">2주:${w2Done ? '📖완료' : '미제출'}</span>
+            <span class="px-1.5 py-0.5 rounded ${w4Done ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-400'}">4주:${w4Done ? '🎤완료' : '미제출'}</span>
+          </div>
+        `;
+
+        card.className = `${bgClass} border-2 ${borderClass} rounded-2xl p-3 flex flex-col justify-between transition-all hover:shadow-lg`;
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between gap-1 mb-1.5">
+              <span class="font-jua text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg">${s.seat}번</span>
+              <div class="flex items-center gap-1">
+                ${lockBadge}
+                ${statusBadge}
+              </div>
+            </div>
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <h4 class="font-bold text-slate-800 text-xs truncate" title="${s.name}">
+                ${s.name || `작가 ${s.seat}`}
+              </h4>
+              <button class="btn-quick-edit-student text-[10px] text-indigo-600 hover:text-indigo-800 font-bold px-1.5 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 transition" data-seat="${s.seat}" title="학생 이름 수정 및 잠금 해제">
+                <i class="fa-solid fa-user-pen"></i> 수정
+              </button>
+            </div>
+            
+            <div class="bg-slate-50 p-2 rounded-xl text-[11px] space-y-0.5 mb-1.5 border border-slate-100 min-h-[50px]">
+              <p class="truncate text-slate-600"><strong>주인공:</strong> ${s.hero || '<span class="text-slate-300">미입력</span>'}</p>
+              <p class="truncate text-slate-600"><strong>장소:</strong> ${s.place || '<span class="text-slate-300">미입력</span>'}</p>
+            </div>
+
+            ${subPills}
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between mt-2">
+            <span class="text-[9px] text-slate-400 font-medium">클릭 시 확대</span>
+            <button class="btn-spotlight-trigger text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-lg border border-amber-200 transition" data-seat="${s.seat}">
+              <i class="fa-solid fa-expand text-[9px]"></i> 스포트라이트
+            </button>
+          </div>
+        `;
+
+        card.querySelector('.btn-spotlight-trigger').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openSpotlight(s.seat);
+        });
+
+        card.querySelector('.btn-quick-edit-student').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openTeacherStudentEdit(s.seat);
+        });
+
+        card.addEventListener('click', () => openSpotlight(s.seat));
+        grid.appendChild(card);
+      }
+    }
+
+    function updateStats() {
+      let idle = 0, writing = 0, ready = 0, done = 0;
+      for (let i = 1; i <= 15; i++) {
+        const st = studentsData[i].status;
+        if (st === 'done') done++;
+        else if (st === 'ready') ready++;
+        else if (st === 'writing') writing++;
+        else idle++;
+      }
+      const idleEl = document.getElementById('count-idle');
+      const writingEl = document.getElementById('count-writing');
+      const readyEl = document.getElementById('count-ready');
+      const doneEl = document.getElementById('count-done');
+      const onlineEl = document.getElementById('badge-online-count');
+
+      if (idleEl) idleEl.innerText = idle;
+      if (writingEl) writingEl.innerText = writing;
+      if (readyEl) readyEl.innerText = ready;
+      if (doneEl) doneEl.innerText = done;
+      if (onlineEl) onlineEl.innerText = `${writing + ready + done}명 활동중`;
+    }
+
+    function openSpotlight(seatNum) {
+      playSound('fanfare');
+      const s = studentsData[seatNum];
+      if (!s) return;
+
+      document.getElementById('spotlight-seat').innerText = `${s.seat}번 좌석`;
+      document.getElementById('spotlight-name').innerText = `${s.name || `작가 ${s.seat}`} 작가님의 상상`;
+      document.getElementById('spotlight-prompt').innerText = s.prompt || '아직 마법 주문을 작성하기 전이에요!';
+      document.getElementById('spotlight-hero').innerText = s.hero || '-';
+      document.getElementById('spotlight-traits').innerText = s.traits || '-';
+      document.getElementById('spotlight-item').innerText = s.item || '-';
+      document.getElementById('spotlight-place').innerText = s.place || '-';
+      document.getElementById('spotlight-weather').innerText = s.weather || '-';
+      document.getElementById('spotlight-mission').innerText = s.mission || '-';
+      document.getElementById('spotlight-ending').innerText = s.ending || '-';
+      document.getElementById('spotlight-style').innerText = s.style ? s.style.split(' ')[0] : '기본';
+
+      const w1El = document.getElementById('spotlight-w1-content');
+      const w2El = document.getElementById('spotlight-w2-content');
+      const w4El = document.getElementById('spotlight-w4-content');
+
+      const sub = s.submissions || {};
+
+      if (w1El) {
+        if (sub['week-1'] && (sub['week-1'].fileData || sub['week-1'].intro)) {
+          w1El.innerHTML = `
+            ${sub['week-1'].fileData ? `<img src="${sub['week-1'].fileData}" alt="주인공" class="w-full h-28 object-cover rounded-xl border border-amber-200 mb-1.5 shadow-sm" />` : ''}
+            <p class="font-medium text-slate-800 line-clamp-3">${sub['week-1'].intro || '소개글 없음'}</p>
+          `;
+        } else {
+          w1El.innerHTML = '<span class="text-slate-400">제출 내역 없음</span>';
+        }
+      }
+
+      if (w2El) {
+        if (sub['week-2'] && (sub['week-2'].linkUrl || sub['week-2'].fileData || sub['week-2'].summary)) {
+          let extra = '';
+          if (sub['week-2'].linkUrl) {
+            extra += `<a href="${sub['week-2'].linkUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-100/60 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> 제미나이 링크 열기</a>`;
+          }
+          if (sub['week-2'].fileData) {
+            if (sub['week-2'].fileData.startsWith('data:image/')) {
+              extra += `<img src="${sub['week-2'].fileData}" alt="초안 삽화" class="w-full h-24 object-cover rounded-xl border border-emerald-200 mt-1" />`;
+            } else {
+              extra += `<a href="${sub['week-2'].fileData}" download="${sub['week-2'].fileName || '동화초안.pdf'}" class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-100/60 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-file-pdf"></i> 초안 PDF 다운로드</a>`;
+            }
+          }
+          w2El.innerHTML = `
+            <p class="font-medium text-slate-800 line-clamp-3">${sub['week-2'].summary || '줄거리 요약 없음'}</p>
+            ${extra}
+          `;
+        } else {
+          w2El.innerHTML = '<span class="text-slate-400">제출 내역 없음</span>';
+        }
+      }
+
+      if (w4El) {
+        if (sub['week-4'] && (sub['week-4'].pdfData || sub['week-4'].linkUrl || sub['week-4'].recitationLine)) {
+          let extra = '';
+          if (sub['week-4'].pdfData) {
+            extra += `<a href="${sub['week-4'].pdfData}" download="${sub['week-4'].pdfName || '최종동화책.pdf'}" class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-700 bg-purple-100/70 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-file-pdf"></i> 최종 동화책 PDF</a>`;
+          }
+          if (sub['week-4'].linkUrl) {
+            extra += `<a href="${sub['week-4'].linkUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-100/70 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-book-open text-[9px]"></i> 전자책 링크 열기</a>`;
+          }
+          w4El.innerHTML = `
+            <p class="font-medium text-slate-800 italic bg-white p-2 rounded-xl border border-indigo-100 leading-snug">
+              "${sub['week-4'].recitationLine || '낭독 문장 미입력'}"
+            </p>
+            <div class="flex flex-wrap gap-1 mt-1">${extra}</div>
+          `;
+        } else {
+          w4El.innerHTML = '<span class="text-slate-400">제출 내역 없음</span>';
+        }
+      }
+
+      document.getElementById('spotlight-modal')?.classList.remove('hidden');
+    }
+
+    function applyCurriculumControl(week, allowStudentSwitch = false, isUserClick = false) {
+      const tab1 = document.getElementById('tab-week-1');
+      const tab2 = document.getElementById('tab-week-2');
+      const tab4 = document.getElementById('tab-week-4');
+      const sectionPartB = document.getElementById('section-part-b');
+      const sectionPartC = document.getElementById('section-part-c');
+      const promptTitle = document.getElementById('assembled-prompt-title');
+      const promptSubtitle = document.getElementById('assembled-prompt-subtitle');
+      const syncText = document.getElementById('curriculum-sync-text');
+
+      currentWeekMode = week;
+      [tab1, tab2, tab4].forEach(b => {
+        if (b) {
+          b.classList.remove('bg-amber-500', 'text-white', 'shadow-sm');
+          b.classList.add('bg-slate-100', 'text-slate-700');
+        }
+      });
+
+      if (week === 'week-1') {
+        if (tab1) {
+          tab1.classList.add('bg-amber-500', 'text-white', 'shadow-sm');
+          tab1.classList.remove('bg-slate-100', 'text-slate-700');
+        }
+        if (sectionPartB) sectionPartB.classList.add('opacity-40');
+        if (sectionPartC) sectionPartC.classList.add('opacity-40');
+        if (promptTitle) promptTitle.innerText = "1주차: 주인공 단독 캐릭터 소환 주문서";
+        if (promptSubtitle) promptSubtitle.innerText = "제미나이에 붙여넣어 내 주인공의 첫 번째 캐릭터 사진을 만들어보세요!";
+        if (syncText) syncText.innerText = allowStudentSwitch ? "자유 모드 (1주차 선택됨)" : "선생님 지정 1주차 진행 중 🔒";
+      } else if (week === 'week-2') {
+        if (tab2) {
+          tab2.classList.add('bg-amber-500', 'text-white', 'shadow-sm');
+          tab2.classList.remove('bg-slate-100', 'text-slate-700');
+        }
+        if (sectionPartB) sectionPartB.classList.remove('opacity-40');
+        if (sectionPartC) sectionPartC.classList.remove('opacity-40');
+        if (promptTitle) promptTitle.innerText = "2~3주차: 제미나이 Storybook 마법 주문서";
+        if (promptSubtitle) promptSubtitle.innerText = "1주차에 만든 캐릭터 사진을 첨부하고 이 전체 주문을 넣으면 동화책 완성!";
+        if (syncText) syncText.innerText = allowStudentSwitch ? "자유 모드 (2~3주차 선택됨)" : "선생님 지정 2~3주차 진행 중 🔒";
+      } else {
+        if (tab4) {
+          tab4.classList.add('bg-amber-500', 'text-white', 'shadow-sm');
+          tab4.classList.remove('bg-slate-100', 'text-slate-700');
+        }
+        if (sectionPartB) sectionPartB.classList.remove('opacity-40');
+        if (sectionPartC) sectionPartC.classList.remove('opacity-40');
+        if (promptTitle) promptTitle.innerText = "4~5주차: 꼬마 작가 낭독 & 출판 발표회";
+        if (promptSubtitle) promptSubtitle.innerText = "완성된 동화 그림과 멋진 문장을 아래 상자에 등록하고 선생님 화면으로 전송하세요!";
+        if (syncText) syncText.innerText = allowStudentSwitch ? "자유 모드 (4~5주차 선택됨)" : "선생님 지정 4~5주차 진행 중 🔒";
+      }
+
+      renderWeeklySubmissionUI(week);
+      updateStudentPromptPreview();
+
+      if (isUserClick && week === 'week-4') {
+        document.getElementById('section-student-submission')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function openTeacherStudentEdit(seatNum) {
+      editingSeatTarget = seatNum;
+      const s = studentsData[seatNum];
+      document.getElementById('edit-modal-seat-title').innerText = `${seatNum}번 좌석`;
+      document.getElementById('edit-modal-student-name').value = s.name || `작가 ${seatNum}`;
+
+      const toggleBtn = document.getElementById('btn-toggle-seat-lock');
+      const lockDesc = document.getElementById('edit-modal-lock-desc');
+      if (s.isLocked) {
+        toggleBtn.innerText = '잠금 해제하기 (학생에게 편집 권한 주기)';
+        toggleBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-jua bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-200 transition';
+        lockDesc.innerText = '현재 잠김: 학생 화면에서 임의 수정 불가';
+      } else {
+        toggleBtn.innerText = '좌석 잠그기 (임의 수정 방지)';
+        toggleBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-jua bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 transition';
+        lockDesc.innerText = '현재 열림: 학생이 직접 수정 가능';
+      }
+
+      document.getElementById('teacher-student-edit-modal')?.classList.remove('hidden');
+    }
+
+    /* Custom Toast notification */
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+      if (!toast || !toastMsg) return;
+
+      toastMsg.innerText = msg;
+      if (toastIcon) {
+        toastIcon.className = isSuccess
+          ? 'fa-solid fa-circle-check text-amber-400 text-base md:text-lg'
+          : 'fa-solid fa-triangle-exclamation text-rose-400 text-base md:text-lg';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    function initApp() {
+      // Load stored curriculum state
+      try {
+        const savedCurr = localStorage.getItem('hwajeong_curriculum_state');
+        if (savedCurr) {
+          globalCurriculumState = JSON.parse(savedCurr);
+        }
+      } catch (e) {}
+
+      // Load stored student records
+      for (let i = 1; i <= 15; i++) {
+        try {
+          const savedStudent = localStorage.getItem(`hwajeong_student_${i}`);
+          if (savedStudent) {
+            studentsData[i] = { ...studentsData[i], ...JSON.parse(savedStudent) };
+          }
+        } catch (e) {}
+      }
+
+      // Populate seat dropdown (1 ~ 15)
+      const seatSelect = document.getElementById('student-seat-select');
+      if (seatSelect) {
+        seatSelect.innerHTML = '';
+        for (let i = 1; i <= 15; i++) {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.innerText = `${i}번 좌석`;
+          seatSelect.appendChild(opt);
+        }
+
+        seatSelect.addEventListener('change', (e) => {
+          const targetSeat = parseInt(e.target.value, 10);
+          if (studentsData[targetSeat]?.isLocked) {
+            showToast(`⚠️ ${targetSeat}번 좌석은 이미 '${studentsData[targetSeat].name}' 작가님이 확정하여 사용 중입니다!`, false);
+            playSound('click');
+            seatSelect.value = currentSeat;
+            return;
+          }
+
+          currentSeat = targetSeat;
+          const s = studentsData[currentSeat];
+          document.getElementById('student-name-input').value = s.name === `작가 ${currentSeat}` ? '' : s.name;
+          document.getElementById('input-hero').value = s.hero || '';
+          document.getElementById('input-traits').value = s.traits || '';
+          document.getElementById('input-item').value = s.item || '';
+          document.getElementById('input-place').value = s.place || '';
+          document.getElementById('input-weather').value = s.weather || '';
+          document.getElementById('input-mission').value = s.mission || '';
+          document.getElementById('input-ending').value = s.ending || '';
+
+          updateStudentLockUI();
+          renderWeeklySubmissionUI(currentWeekMode);
+          updateStudentPromptPreview();
+          playSound('click');
+        });
+      }
+
+      // Lock Student Name Button Handler
+      document.getElementById('btn-lock-name')?.addEventListener('click', () => {
+        const nameVal = document.getElementById('student-name-input')?.value.trim();
+        if (!nameVal) {
+          showToast('⚠️ 먼저 내 작가 이름(별명)을 적은 뒤 확정 버튼을 눌러주세요!', false);
+          document.getElementById('student-name-input')?.focus();
+          return;
+        }
+
+        studentsData[currentSeat].name = nameVal;
+        studentsData[currentSeat].isLocked = true;
+        syncStudentData(currentSeat);
+        updateStudentLockUI();
+        playSound('fanfare');
+        showToast(`🔒 ${currentSeat}번 좌석 '${nameVal}' 작가님으로 확정되었습니다! (수정은 선생님께 요청)`);
+      });
+
+      // Student Tab clicks
+      function handleStudentTabClick(targetWeek) {
+        if (!globalCurriculumState.allowStudentSwitch && globalCurriculumState.week !== targetWeek) {
+          playSound('click');
+          showToast(`🔒 지금은 선생님께서 지정하신 [${globalCurriculumState.week === 'week-1' ? '1주차' : globalCurriculumState.week === 'week-2' ? '2~3주차' : '4~5주차'}] 수업 시간입니다!`, false);
+          return;
+        }
+        playSound('click');
+        applyCurriculumControl(targetWeek, globalCurriculumState.allowStudentSwitch, true);
+      }
+
+      document.getElementById('tab-week-1')?.addEventListener('click', () => handleStudentTabClick('week-1'));
+      document.getElementById('tab-week-2')?.addEventListener('click', () => handleStudentTabClick('week-2'));
+      document.getElementById('tab-week-4')?.addEventListener('click', () => handleStudentTabClick('week-4'));
+
+      // Teacher Remote Curriculum Control Buttons
+      const btnSetW1 = document.getElementById('btn-teacher-set-week1');
+      const btnSetW2 = document.getElementById('btn-teacher-set-week2');
+      const btnSetW4 = document.getElementById('btn-teacher-set-week4');
+      const btnSetFree = document.getElementById('btn-teacher-set-free');
+      const teacherCurriculumBtns = [btnSetW1, btnSetW2, btnSetW4, btnSetFree];
+
+      function updateTeacherCurriculumBtnUI(activeBtn) {
+        teacherCurriculumBtns.forEach(b => {
+          if (b) {
+            b.classList.remove('bg-indigo-600', 'bg-amber-600', 'text-white', 'shadow-sm');
+            b.classList.add('bg-white', 'text-indigo-900');
+          }
+        });
+        if (activeBtn) {
+          activeBtn.classList.add(activeBtn === btnSetFree ? 'bg-amber-600' : 'bg-indigo-600', 'text-white', 'shadow-sm');
+          activeBtn.classList.remove('bg-white', 'text-indigo-900');
+        }
+      }
+
+      btnSetW1?.addEventListener('click', () => {
+        playSound('magic');
+        updateTeacherCurriculumBtnUI(btnSetW1);
+        broadcastCurriculumControl('week-1', false);
+        applyCurriculumControl('week-1', false, false);
+        showToast('📡 15명 학생 화면이 [🐻 1주차: 캐릭터 소환]으로 고정되었습니다.');
+      });
+
+      btnSetW2?.addEventListener('click', () => {
+        playSound('magic');
+        updateTeacherCurriculumBtnUI(btnSetW2);
+        broadcastCurriculumControl('week-2', false);
+        applyCurriculumControl('week-2', false, false);
+        showToast('📡 15명 학생 화면이 [📖 2~3주차: 전체 주문서]로 고정되었습니다.');
+      });
+
+      btnSetW4?.addEventListener('click', () => {
+        playSound('magic');
+        updateTeacherCurriculumBtnUI(btnSetW4);
+        broadcastCurriculumControl('week-4', false);
+        applyCurriculumControl('week-4', false, false);
+        showToast('📡 15명 학생 화면이 [🎤 4~5주차: 낭독 및 발표]로 고정되었습니다.');
+      });
+
+      btnSetFree?.addEventListener('click', () => {
+        playSound('magic');
+        updateTeacherCurriculumBtnUI(btnSetFree);
+        broadcastCurriculumControl(globalCurriculumState.week, true);
+        applyCurriculumControl(globalCurriculumState.week, true, false);
+        showToast('🔓 학생 자율 선택 모드가 켜졌습니다. 아이들이 원하는 탭을 눌러볼 수 있습니다.');
+      });
+
+      // Typing Sound and Auto-Assembly Inputs
+      const inputIds = ['input-hero', 'input-traits', 'input-item', 'input-place', 'input-weather', 'input-mission', 'input-ending', 'student-name-input'];
+      inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', () => {
+            playSound('type');
+            updateStudentPromptPreview();
+          });
+        }
+      });
+
+      // Quick Chips Click
+      document.querySelectorAll('.btn-quick-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          playSound('click');
+          const targetId = btn.getAttribute('data-target');
+          const val = btn.getAttribute('data-val');
+          const targetEl = document.getElementById(targetId);
+          if (targetEl) {
+            targetEl.value = val;
+            updateStudentPromptPreview();
+          }
+        });
+      });
+
+      // 8 Style Buttons Selection
+      document.querySelectorAll('.btn-style-choice').forEach(btn => {
+        btn.addEventListener('click', () => {
+          playSound('click');
+          document.querySelectorAll('.btn-style-choice').forEach(b => {
+            b.classList.remove('border-purple-400', 'bg-purple-50', 'text-purple-900', 'active');
+            b.classList.add('border-slate-200', 'text-slate-700');
+          });
+          btn.classList.add('border-purple-400', 'bg-purple-50', 'text-purple-900', 'active');
+          btn.classList.remove('border-slate-200', 'text-slate-700');
+
+          currentStyle = btn.getAttribute('data-style');
+          updateStudentPromptPreview();
+        });
+      });
+
+      // Copy Prompt to Clipboard
+      document.getElementById('btn-copy-prompt')?.addEventListener('click', () => {
+        const promptText = buildPrompt();
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = promptText;
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        try {
+          document.execCommand('copy');
+          playSound('magic');
+          showToast('🪄 마법 주문이 가방에 쏙 담겼어요! 제미나이에 붙여넣기(Ctrl+V) 해보세요!');
+        } catch (err) {
+          showToast('복사에 실패했어요. 마우스로 직접 드래그해 주세요.', false);
+        }
+        document.body.removeChild(tempTextarea);
+      });
+
+      let w1FileData = '', w1FileName = '';
+      let w2FileData = '', w2FileName = '';
+      let w4PdfData = '', w4PdfName = '';
+
+      const fileW1 = document.getElementById('file-w1-input');
+      fileW1?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          w1FileName = file.name;
+          const reader = new FileReader();
+          reader.onload = (loadEvt) => {
+            w1FileData = loadEvt.target.result;
+            const imgPreview = document.getElementById('img-preview-w1');
+            const previewBox = document.getElementById('preview-box-w1');
+            const labelW1 = document.getElementById('label-w1-file');
+            if (imgPreview) imgPreview.src = w1FileData;
+            if (previewBox) previewBox.classList.remove('hidden');
+            if (labelW1) labelW1.innerText = `${file.name.substring(0, 15)}... 선택됨`;
+            playSound('click');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      const fileW2 = document.getElementById('file-w2-input');
+      fileW2?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          w2FileName = file.name;
+          const reader = new FileReader();
+          reader.onload = (loadEvt) => {
+            w2FileData = loadEvt.target.result;
+            const labelW2 = document.getElementById('label-w2-file');
+            const fileW2Name = document.getElementById('file-w2-name');
+            if (labelW2) labelW2.innerText = '파일 준비 완료';
+            if (fileW2Name) fileW2Name.innerText = `📄 ${file.name}`;
+            playSound('click');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      const fileW4 = document.getElementById('file-w4-input');
+      fileW4?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          w4PdfName = file.name;
+          const reader = new FileReader();
+          reader.onload = (loadEvt) => {
+            w4PdfData = loadEvt.target.result;
+            const labelW4 = document.getElementById('label-w4-file');
+            const fileW4Name = document.getElementById('file-w4-name');
+            if (labelW4) labelW4.innerText = '최종 PDF 준비 완료';
+            if (fileW4Name) fileW4Name.innerText = `📕 ${file.name}`;
+            playSound('click');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      document.getElementById('btn-submit-weekly')?.addEventListener('click', async () => {
+        const s = studentsData[currentSeat];
+        const studentName = s.name || `작가 ${currentSeat}`;
+        const week = currentWeekMode;
+
+        let gdrivePayload = {
+          seat: currentSeat,
+          studentName: studentName,
+          week: week,
+          weekLabel: week === 'week-1' ? '1주차_주인공캐릭터' : (week === 'week-2' ? '2-3주차_동화초안' : '4-5주차_최종동화책'),
+          note: '',
+          linkUrl: '',
+          fileName: '',
+          fileBase64: '',
+          mimeType: ''
+        };
+
+        if (week === 'week-1') {
+          const intro = document.getElementById('input-w1-intro')?.value.trim() || '';
+          s.submissions['week-1'] = {
+            intro: intro,
+            fileData: w1FileData || s.submissions['week-1'].fileData,
+            fileName: w1FileName || s.submissions['week-1'].fileName,
+            timestamp: Date.now()
+          };
+          gdrivePayload.note = intro;
+          gdrivePayload.fileName = s.submissions['week-1'].fileName || '주인공캐릭터.png';
+          gdrivePayload.fileBase64 = s.submissions['week-1'].fileData;
+          gdrivePayload.mimeType = 'image/png';
+        } else if (week === 'week-2') {
+          const summary = document.getElementById('input-w2-summary')?.value.trim() || '';
+          const linkUrl = document.getElementById('input-w2-link')?.value.trim() || '';
+          s.submissions['week-2'] = {
+            summary: summary,
+            linkUrl: linkUrl,
+            fileData: w2FileData || s.submissions['week-2'].fileData,
+            fileName: w2FileName || s.submissions['week-2'].fileName,
+            timestamp: Date.now()
+          };
+          gdrivePayload.note = summary;
+          gdrivePayload.linkUrl = linkUrl;
+          gdrivePayload.fileName = s.submissions['week-2'].fileName || '동화초안.pdf';
+          gdrivePayload.fileBase64 = s.submissions['week-2'].fileData;
+          gdrivePayload.mimeType = (s.submissions['week-2'].fileName?.endsWith('.pdf')) ? 'application/pdf' : 'image/jpeg';
+        } else {
+          const recitationLine = document.getElementById('input-w4-line')?.value.trim() || '';
+          const linkUrl = document.getElementById('input-w4-link')?.value.trim() || '';
+          s.submissions['week-4'] = {
+            recitationLine: recitationLine,
+            linkUrl: linkUrl,
+            pdfData: w4PdfData || s.submissions['week-4'].pdfData,
+            pdfName: w4PdfName || s.submissions['week-4'].pdfName,
+            timestamp: Date.now()
+          };
+          gdrivePayload.note = recitationLine;
+          gdrivePayload.linkUrl = linkUrl;
+          gdrivePayload.fileName = s.submissions['week-4'].pdfName || '최종동화책.pdf';
+          gdrivePayload.fileBase64 = s.submissions['week-4'].pdfData;
+          gdrivePayload.mimeType = 'application/pdf';
+        }
+
+        s.status = 'done';
+        syncStudentData(currentSeat);
+        renderWeeklySubmissionUI(week);
+        playSound('magic');
+
+        uploadToGoogleDrive(gdrivePayload);
+
+        const weekLabelKr = week === 'week-1' ? '1주차 캐릭터' : (week === 'week-2' ? '2~3주차 동화 초안' : '4~5주차 최종 동화책');
+        showToast(`✨ ${weekLabelKr} 과제가 선생님 화면 및 드라이브로 안전하게 전송되었습니다!`);
+      });
+
+      const btnStudent = document.getElementById('btn-mode-student');
+      const btnTeacher = document.getElementById('btn-mode-teacher');
+      const viewStudent = document.getElementById('view-student');
+      const viewTeacher = document.getElementById('view-teacher');
+      const authModal = document.getElementById('teacher-auth-modal');
+      const authCard = document.getElementById('teacher-auth-card');
+      const authInput = document.getElementById('teacher-password-input');
+      const authError = document.getElementById('teacher-auth-error');
+      const btnConfirmAuth = document.getElementById('btn-confirm-teacher-auth');
+      const btnCancelAuth = document.getElementById('btn-cancel-teacher-auth');
+      const btnLockTeacher = document.getElementById('btn-lock-teacher');
+
+      function switchToStudentMode() {
+        btnStudent?.classList.add('bg-white', 'text-amber-600', 'shadow-sm');
+        btnStudent?.classList.remove('text-slate-600');
+        btnTeacher?.classList.remove('bg-white', 'text-amber-600', 'shadow-sm');
+        btnTeacher?.classList.add('text-slate-600');
+        viewStudent?.classList.remove('hidden');
+        viewTeacher?.classList.add('hidden');
+      }
+
+      function switchToTeacherMode() {
+        btnTeacher?.classList.add('bg-white', 'text-amber-600', 'shadow-sm');
+        btnTeacher?.classList.remove('text-slate-600');
+        btnStudent?.classList.remove('bg-white', 'text-amber-600', 'shadow-sm');
+        btnStudent?.classList.add('text-slate-600');
+        viewStudent?.classList.add('hidden');
+        viewTeacher?.classList.remove('hidden');
+        renderTeacherCards();
+        updateStats();
+      }
+
+      function openTeacherAuth() {
+        if (authInput) authInput.value = '';
+        authError?.classList.add('hidden');
+        authModal?.classList.remove('hidden');
+        setTimeout(() => authInput?.focus(), 100);
+      }
+
+      function closeTeacherAuth() {
+        authModal?.classList.add('hidden');
+      }
+
+      function checkTeacherPassword() {
+        const entered = authInput?.value.trim() || '';
+        const storedPin = getStoredTeacherPin();
+        if (entered === storedPin) {
+          isTeacherUnlocked = true;
+          closeTeacherAuth();
+          playSound('magic');
+          switchToTeacherMode();
+          showToast('🔐 선생님 관제탑이 잠금 해제되었습니다!');
+        } else {
+          playSound('click');
+          authError?.classList.remove('hidden');
+          if (authCard) {
+            authCard.classList.add('translate-x-2');
+            setTimeout(() => authCard.classList.remove('translate-x-2'), 100);
+            setTimeout(() => authCard.classList.add('-translate-x-2'), 200);
+            setTimeout(() => authCard.classList.remove('-translate-x-2'), 300);
+          }
+          authInput?.select();
+        }
+      }
+
+      btnStudent?.addEventListener('click', () => {
+        playSound('click');
+        switchToStudentMode();
+      });
+
+      btnTeacher?.addEventListener('click', () => {
+        playSound('click');
+        if (isTeacherUnlocked) {
+          switchToTeacherMode();
+        } else {
+          openTeacherAuth();
+        }
+      });
+
+      btnConfirmAuth?.addEventListener('click', checkTeacherPassword);
+      btnCancelAuth?.addEventListener('click', () => {
+        playSound('click');
+        closeTeacherAuth();
+      });
+
+      authInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          checkTeacherPassword();
+        } else if (e.key === 'Escape') {
+          closeTeacherAuth();
+        }
+      });
+
+      btnLockTeacher?.addEventListener('click', () => {
+        playSound('click');
+        isTeacherUnlocked = false;
+        switchToStudentMode();
+        showToast('🔒 관제탑이 안전하게 잠겼습니다. (학생 모드로 전환)');
+      });
+
+      document.getElementById('btn-close-spotlight')?.addEventListener('click', () => {
+        document.getElementById('spotlight-modal')?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-cheer-spotlight')?.addEventListener('click', () => {
+        playSound('magic');
+        showToast('🎉 온 교실에 칭찬의 박수 소리가 울려 퍼집니다! 짝짝짝!');
+      });
+
+      // Google Drive Settings Modal
+      const gdriveModal = document.getElementById('teacher-gdrive-modal');
+      const inputGdriveUrl = document.getElementById('input-gdrive-webhook-url');
+
+      document.getElementById('btn-open-gdrive-settings')?.addEventListener('click', () => {
+        if (inputGdriveUrl) inputGdriveUrl.value = getStoredGdriveWebhook();
+        gdriveModal?.classList.remove('hidden');
+      });
+
+      document.getElementById('btn-close-gdrive-modal')?.addEventListener('click', () => {
+        gdriveModal?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-done-gdrive-modal')?.addEventListener('click', () => {
+        gdriveModal?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-save-gdrive-webhook')?.addEventListener('click', () => {
+        const url = inputGdriveUrl?.value.trim() || '';
+        setStoredGdriveWebhook(url);
+        playSound('magic');
+        renderWeeklySubmissionUI(currentWeekMode);
+        showToast('📁 구글 드라이브 웹 앱 URL이 성공적으로 저장되었습니다!');
+      });
+
+      document.getElementById('btn-copy-gas-code')?.addEventListener('click', () => {
+        const tempTa = document.createElement('textarea');
+        tempTa.value = GOOGLE_APPS_SCRIPT_TEMPLATE;
+        document.body.appendChild(tempTa);
+        tempTa.select();
+        try {
+          document.execCommand('copy');
+          playSound('magic');
+          showToast('📋 구글 드라이브 자동 연동 스크립트가 복사되었습니다!');
+        } catch (e) {
+          showToast('코드 복사에 실패했습니다.', false);
+        }
+        document.body.removeChild(tempTa);
+      });
+
+      // Teacher PIN Change Modal
+      const pinModal = document.getElementById('teacher-pin-modal');
+      const inputPinCurrent = document.getElementById('input-pin-current');
+      const inputPinNew = document.getElementById('input-pin-new');
+      const inputPinConfirm = document.getElementById('input-pin-confirm');
+      const pinErrorEl = document.getElementById('pin-change-error');
+      const pinErrorText = document.getElementById('pin-change-error-text');
+
+      document.getElementById('btn-open-pin-change')?.addEventListener('click', () => {
+        if (inputPinCurrent) inputPinCurrent.value = '';
+        if (inputPinNew) inputPinNew.value = '';
+        if (inputPinConfirm) inputPinConfirm.value = '';
+        pinErrorEl?.classList.add('hidden');
+        pinModal?.classList.remove('hidden');
+        setTimeout(() => inputPinCurrent?.focus(), 100);
+      });
+
+      document.getElementById('btn-cancel-pin-change')?.addEventListener('click', () => {
+        pinModal?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-save-new-pin')?.addEventListener('click', () => {
+        const currentStored = getStoredTeacherPin();
+        const enteredCurrent = inputPinCurrent?.value.trim() || '';
+        const enteredNew = inputPinNew?.value.trim() || '';
+        const enteredConfirm = inputPinConfirm?.value.trim() || '';
+
+        if (enteredCurrent !== currentStored) {
+          if (pinErrorText) pinErrorText.innerText = '현재 비밀번호가 올바르지 않습니다.';
+          pinErrorEl?.classList.remove('hidden');
+          inputPinCurrent?.focus();
+          return;
+        }
+        if (enteredNew.length < 4) {
+          if (pinErrorText) pinErrorText.innerText = '새 비밀번호는 4자리 이상 입력해주세요.';
+          pinErrorEl?.classList.remove('hidden');
+          inputPinNew?.focus();
+          return;
+        }
+        if (enteredNew !== enteredConfirm) {
+          if (pinErrorText) pinErrorText.innerText = '새 비밀번호와 확인 입력이 일치하지 않습니다.';
+          pinErrorEl?.classList.remove('hidden');
+          inputPinConfirm?.focus();
+          return;
+        }
+
+        setStoredTeacherPin(enteredNew);
+        pinModal?.classList.add('hidden');
+        playSound('magic');
+        showToast('🔑 선생님 비밀번호가 성공적으로 변경되었습니다!');
+      });
+
+      // Student Edit Modal
+      document.getElementById('btn-cancel-student-edit')?.addEventListener('click', () => {
+        document.getElementById('teacher-student-edit-modal')?.classList.add('hidden');
+      });
+
+      document.getElementById('btn-toggle-seat-lock')?.addEventListener('click', () => {
+        if (!editingSeatTarget) return;
+        studentsData[editingSeatTarget].isLocked = !studentsData[editingSeatTarget].isLocked;
+        syncStudentData(editingSeatTarget);
+        openTeacherStudentEdit(editingSeatTarget);
+        playSound('magic');
+        showToast(`${editingSeatTarget}번 좌석 잠금 상태가 변경되었습니다.`);
+      });
+
+      document.getElementById('btn-save-student-edit')?.addEventListener('click', () => {
+        if (!editingSeatTarget) return;
+        const newName = document.getElementById('edit-modal-student-name')?.value.trim() || `작가 ${editingSeatTarget}`;
+        studentsData[editingSeatTarget].name = newName;
+        syncStudentData(editingSeatTarget);
+        document.getElementById('teacher-student-edit-modal')?.classList.add('hidden');
+        playSound('click');
+        showToast(`✨ ${editingSeatTarget}번 작가 이름이 '${newName}'(으)로 업데이트되었습니다!`);
+      });
+
+      // Demo Mockup Fill
+      document.getElementById('btn-demo-fill')?.addEventListener('click', () => {
+        playSound('magic');
+        const mockSamples = [
+          { name: '김민우', hero: '아기 다람쥐', traits: '동그란 안경과 초록 멜빵바지', item: '도토리 모양 가방', place: '화정도서관 비밀 서재', weather: '별빛이 쏟아지는 밤', mission: '하늘을 날아다니는 황금 마법 책을 찾아요', ending: '친구들과 도토리 파티를 열어요', style: '포근하고 따뜻한 수채화 동화책 일러스트', status: 'done', w1Intro: '도토리 가방을 맨 세상에서 가장 용감한 다람쥐 또또' },
+          { name: '이지윤', hero: '날개 달린 분홍 고양이', traits: '은색 방울 목걸이', item: '반짝이는 별 지팡이', place: '달콤한 솜사탕 구름 나라', weather: '무지개가 뜬 오후', mission: '길 잃은 아기 별을 구출해요', ending: '밤하늘 등대를 함께 켜요', style: '따스한 바람과 풀내음이 느껴지는 감성 지브리 애니메이션 배경 수채화풍', status: 'ready', w1Intro: '' },
+          { name: '박준혁', hero: '초콜릿 발사 로봇', traits: '번쩍이는 레이더 안테나', item: '비밀 마법 지도', place: '달콤한 과자 행성', weather: '초코비가 내리는 날', mission: '아기 젤리곰을 집에 데려다줘요', ending: '모두 함께 젤리 댄스를 춰요', style: '생동감 넘치고 표정이 풍부한 디즈니 픽사 3D 카툰 애니메이션풍', status: 'writing', w1Intro: '' },
+          { name: '정서아', hero: '꼬마 요정 팅커', traits: '반짝이는 민트 날개', item: '빛나는 유리 구슬', place: '은하수 숲', weather: '은은한 달빛 밤', mission: '달빛 조각을 모아요', ending: '숲 전체가 환하게 빛나요', style: '색종이를 아기자기하게 가위로 오려 겹쳐 만든 따뜻한 페이퍼 컷아웃(종이 공예) 콜라주 아트', status: 'ready', w1Intro: '' },
+          { name: '최하은', hero: '아기 펭귄 포포', traits: '빨간 털모자와 목도리', item: '황금 나침반', place: '빙하 미끄럼틀 동굴', weather: '하얀 눈이 펑펑 내리는 날', mission: '얼음 썰매 대회에서 우승해요', ending: '따뜻한 코코아를 함께 마셔요', style: '귀엽고 통통 튀는 레트로 16비트 도트 픽셀 아트 비디오 게임풍', status: 'done', w1Intro: '썰매를 타고 온 세상을 누비는 꼬마 펭귄 포포' }
+        ];
+
+        mockSamples.forEach((sample, idx) => {
+          const seat = idx + 1;
+          studentsData[seat] = {
+            ...studentsData[seat],
+            name: sample.name,
+            hero: sample.hero,
+            traits: sample.traits,
+            item: sample.item,
+            place: sample.place,
+            weather: sample.weather,
+            mission: sample.mission,
+            ending: sample.ending,
+            style: sample.style,
+            status: sample.status,
+            prompt: `[${sample.traits}] [${sample.hero}]가 [${sample.item}]을 가지고 [${sample.place}]에서 [${sample.mission}]을 펼치는 ${sample.style} 동화책을 만들어주세요.`,
+            updatedAt: Date.now()
+          };
+          if (sample.w1Intro) {
+            studentsData[seat].submissions['week-1'].intro = sample.w1Intro;
+          }
+          syncStudentData(seat);
+        });
+
+        renderTeacherCards();
+        updateStats();
+        showToast('🪄 5명의 학생 샘플 데이터가 관제탑에 채워졌습니다!');
+      });
+
+      try {
+        broadcastChannel = new BroadcastChannel('hwajeong_storybook_channel');
+        broadcastChannel.onmessage = (event) => {
+          const msg = event.data;
+          if (!msg) return;
+          if (msg.type === 'STUDENT_UPDATE' && msg.seat && msg.data) {
+            studentsData[msg.seat] = msg.data;
+            if (msg.seat === currentSeat) {
+              updateStudentLockUI();
+              renderWeeklySubmissionUI(currentWeekMode);
+            }
+            renderTeacherCards();
+            updateStats();
+          } else if (msg.type === 'CURRICULUM_CONTROL' && msg.curriculum) {
+            globalCurriculumState = msg.curriculum;
+            applyCurriculumControl(globalCurriculumState.week, globalCurriculumState.allowStudentSwitch, false);
+          }
+        };
+      } catch (e) {}
+
+      window.addEventListener('storage', (e) => {
+        if (e.key && e.key.startsWith('hwajeong_student_')) {
+          try {
+            const updated = JSON.parse(e.newValue);
+            if (updated && updated.seat) {
+              studentsData[updated.seat] = updated;
+              if (updated.seat === currentSeat) {
+                updateStudentLockUI();
+                renderWeeklySubmissionUI(currentWeekMode);
+              }
+              renderTeacherCards();
+              updateStats();
+            }
+          } catch (err) {}
+        } else if (e.key === 'hwajeong_curriculum_state') {
+          try {
+            const curr = JSON.parse(e.newValue);
+            if (curr) {
+              globalCurriculumState = curr;
+              applyCurriculumControl(curr.week, curr.allowStudentSwitch, false);
+            }
+          } catch (err) {}
+        }
+      });
+
+      // Initialize UI Views
+      applyCurriculumControl(globalCurriculumState.week || 'week-1', globalCurriculumState.allowStudentSwitch || false, false);
+      updateStudentLockUI();
+      renderWeeklySubmissionUI(currentWeekMode);
+      renderTeacherCards();
+      updateStats();
+
+      // Setup Firebase if credentials are provided
+      setupFirebase();
+    }
+
+    async function setupFirebase() {
+      try {
+        if (!rawFirebaseConfig) return;
+        const app = initializeApp(rawFirebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (initialAuthToken) {
+          await signInWithCustomToken(auth, initialAuthToken);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        const studentsCol = collection(db, 'artifacts', appId, 'students');
+        onSnapshot(studentsCol, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            const data = change.doc.data();
+            if (data && data.seat) {
+              studentsData[data.seat] = { ...studentsData[data.seat], ...data };
+              if (data.seat === currentSeat) {
+                updateStudentLockUI();
+                renderWeeklySubmissionUI(currentWeekMode);
+              }
+              renderTeacherCards();
+              updateStats();
+            }
+          });
+        });
+
+        const configDoc = doc(db, 'artifacts', appId, 'config', 'curriculum');
+        onSnapshot(configDoc, (docSnap) => {
+          if (docSnap.exists()) {
+            const curr = docSnap.data();
+            globalCurriculumState = curr;
+            applyCurriculumControl(curr.week, curr.allowStudentSwitch, false);
+          }
+        });
+      } catch (err) {
+        console.warn('Firebase setup note: working with LocalStorage and BroadcastChannel.', err);
+      }
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
