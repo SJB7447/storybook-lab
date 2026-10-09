@@ -597,6 +597,12 @@
               <span>전체 반 백업</span>
             </button>
 
+            <!-- New Class Reset Button -->
+            <button id="btn-reset-all-class" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs px-3 py-1.5 rounded-xl border border-rose-300 font-bold transition flex items-center gap-1" title="다른 수업에서 쓸 수 있도록 15명 학생 기록을 모두 지우고 처음 상태로 되돌립니다 (백업 파일이 먼저 저장됩니다)">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>새 수업 시작 (초기화)</span>
+            </button>
+
             <button id="btn-demo-fill" class="bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs px-3 py-1.5 rounded-xl border border-purple-300 font-bold transition flex items-center gap-1">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
               <span>5명 샘플 채우기</span>
@@ -1214,8 +1220,8 @@
     };
 
     const studentsData = {};
-    for (let i = 1; i <= 15; i++) {
-      studentsData[i] = {
+    function createDefaultStudent(i) {
+      return {
         seat: i,
         name: `작가 ${i}`,
         isLocked: false,
@@ -1236,6 +1242,43 @@
         },
         updatedAt: Date.now()
       };
+    }
+    for (let i = 1; i <= 15; i++) {
+      studentsData[i] = createDefaultStudent(i);
+    }
+
+    /* 새 수업 초기화: 선생님이 초기화하면 resetAt 시각이 모든 기기에 전달되고,
+       각 기기는 자기 기기에 남은 좌석 기억/작성 기록을 지웁니다. */
+    const RESET_AT_KEY = 'hwajeong_last_reset_at';
+    let clearPendingFileSelections = () => {};
+
+    /* resetData=true 는 초기화를 누른 선생님 기기에서만 사용합니다.
+       다른 기기는 기기에 남은 기록만 지우고, 학생 데이터는 선생님이 비워 둔
+       클라우드/탭 동기화 값을 그대로 받습니다. (새 기기가 접속할 때 화면이 비는 것 방지) */
+    function applyClassReset(resetAt, resetData = false) {
+      let lastApplied = 0;
+      try {
+        lastApplied = Number(localStorage.getItem(RESET_AT_KEY) || 0);
+      } catch (e) {}
+      if (!resetAt || resetAt <= lastApplied) return;
+
+      try {
+        for (let i = 1; i <= 15; i++) localStorage.removeItem(`hwajeong_student_${i}`);
+        localStorage.removeItem(DEVICE_SEAT_STORAGE_KEY);
+        localStorage.setItem(RESET_AT_KEY, String(resetAt));
+      } catch (e) {}
+
+      clearTimeout(debounceTimer);
+      if (resetData) {
+        for (let i = 1; i <= 15; i++) studentsData[i] = createDefaultStudent(i);
+      }
+      currentSeat = 1;
+      const seatSelect = document.getElementById('student-seat-select');
+      if (seatSelect) seatSelect.value = '1';
+      clearPendingFileSelections();
+      loadSeatDataIntoForm(currentSeat);
+      renderTeacherCards();
+      updateStats();
     }
 
     let currentSeat = 1;
@@ -1425,7 +1468,7 @@ function doPost(e) {
       const countEl = document.getElementById('prompt-char-count');
       if (previewEl) previewEl.innerText = prompt;
       if (countEl) countEl.innerText = `${prompt.length}글자 조립됨`;
-      if (!persist) return;
+      if (!persist || isSeatLockedByOtherDevice()) return;
 
       const hero = document.getElementById('input-hero')?.value.trim() || '';
       const name = document.getElementById('student-name-input')?.value.trim() || `작가 ${currentSeat}`;
@@ -1465,14 +1508,45 @@ function doPost(e) {
       }, 400);
     }
 
+    /* 다른 친구가 자기 기기에서 확정한 좌석인지 (이 기기는 그 좌석의 주인이 아님).
+       기기마다 처음엔 1번 좌석이 열리므로, 이를 막지 않으면 새 기기에서
+       친구의 글을 덮어쓰거나 좌석 선택이 잠겨 버립니다. */
+    function isSeatLockedByOtherDevice(seatNum = currentSeat) {
+      if (!studentsData[seatNum]?.isLocked) return false;
+      try {
+        return localStorage.getItem(DEVICE_SEAT_STORAGE_KEY) !== String(seatNum);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    const STUDENT_EDITABLE_IDS = ['input-hero', 'input-traits', 'input-item', 'input-place', 'input-weather', 'input-mission', 'input-ending',
+      'input-w1-intro', 'input-w2-summary', 'input-w2-link', 'input-w4-line', 'input-w4-link', 'file-w1-input', 'file-w2-input', 'file-w4-input'];
+
     function updateStudentLockUI() {
       const s = studentsData[currentSeat];
       const seatSelect = document.getElementById('student-seat-select');
       const nameInput = document.getElementById('student-name-input');
       const btnLock = document.getElementById('btn-lock-name');
       const badgeLocked = document.getElementById('badge-name-locked');
+      const badgeText = badgeLocked?.querySelector('span');
+      const lockedByOther = isSeatLockedByOtherDevice();
 
-      if (s && s.isLocked) {
+      STUDENT_EDITABLE_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = lockedByOther;
+      });
+      if (badgeText) badgeText.innerText = lockedByOther ? '친구가 쓰는 좌석이에요. 내 좌석 번호를 골라주세요!' : '확정됨';
+
+      if (lockedByOther) {
+        if (seatSelect) seatSelect.disabled = false;
+        if (nameInput) nameInput.disabled = true;
+        if (btnLock) btnLock.classList.add('hidden');
+        if (badgeLocked) {
+          badgeLocked.classList.remove('hidden');
+          badgeLocked.classList.add('flex');
+        }
+      } else if (s && s.isLocked) {
         if (seatSelect) seatSelect.disabled = true;
         if (nameInput) nameInput.disabled = true;
         if (btnLock) btnLock.classList.add('hidden');
@@ -2123,6 +2197,11 @@ function doPost(e) {
       document.getElementById('input-import-student-backup')?.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        if (isSeatLockedByOtherDevice()) {
+          e.target.value = '';
+          showToast('⚠️ 친구가 확정한 좌석이에요. 먼저 내 좌석 번호를 골라주세요!', false);
+          return;
+        }
 
         const reader = new FileReader();
         reader.onload = (loadEvt) => {
@@ -2139,6 +2218,10 @@ function doPost(e) {
               ...imported,
               seat: currentSeat // Keep current seat index
             };
+            // 복원한 작품의 주인은 이 기기
+            try {
+              localStorage.setItem(DEVICE_SEAT_STORAGE_KEY, String(currentSeat));
+            } catch (err) {}
 
             syncStudentData(currentSeat);
             loadSeatDataIntoForm(currentSeat);
@@ -2159,6 +2242,38 @@ function doPost(e) {
         triggerDownload(fileName, JSON.stringify(studentsData, null, 2));
         playSound('magic');
         showToast(`📁 15명 전체 학생의 현재 작성 상태가 [${fileName}] 파일로 다운로드되었습니다!`);
+      });
+
+      // New Class Reset (모든 학생 기록 초기화, 설정은 유지)
+      document.getElementById('btn-reset-all-class')?.addEventListener('click', () => {
+        if (!confirm('⚠️ 15명 학생의 이름·주문서·제출 기록을 모두 지우고 새 수업을 시작할까요?\n\n(초기화 전에 전체 백업 파일이 자동으로 저장됩니다. 구글 드라이브에 저장된 파일, 드라이브 연동·비밀번호 설정은 그대로 남습니다.)')) return;
+        if (!confirm('정말 초기화할까요? 이 작업은 되돌릴 수 없습니다.')) return;
+
+        const today = new Date().toISOString().slice(0, 10);
+        triggerDownload(`화정도서관_초기화전_백업_${today}.json`, JSON.stringify(studentsData, null, 2));
+
+        const resetAt = Date.now();
+        applyClassReset(resetAt, true);
+
+        // 모든 좌석 기록을 기본값으로 덮어쓰기 + 다른 기기에 초기화 신호 전달
+        for (let i = 1; i <= 15; i++) {
+          writeCloudDoc(['artifacts', appId, 'students', `seat_${i}`], studentsData[i]);
+          if (broadcastChannel) {
+            try { broadcastChannel.postMessage({ type: 'STUDENT_UPDATE', seat: i, data: studentsData[i] }); } catch (e) {}
+          }
+        }
+        writeCloudDoc(['artifacts', appId, 'config', 'session'], { resetAt });
+        if (broadcastChannel) {
+          try { broadcastChannel.postMessage({ type: 'CLASS_RESET', resetAt }); } catch (e) {}
+        }
+
+        updateTeacherCurriculumBtnUI(btnSetW1);
+        broadcastCurriculumControl('week-1', false);
+        applyCurriculumControl('week-1', false, false);
+        if (!isDriveShutterActive) broadcastShutterControl(true);
+
+        playSound('fanfare');
+        showToast('🧹 새 수업 준비 완료! 모든 학생 기록이 초기화되었습니다. (백업 파일 저장됨)');
       });
 
       // Student Tab clicks
@@ -2305,6 +2420,33 @@ function doPost(e) {
       let w2FileData = '', w2FileName = '';
       let w4PdfData = '', w4PdfName = '';
 
+      clearPendingFileSelections = () => {
+        w1FileData = ''; w1FileName = '';
+        w2FileData = ''; w2FileName = '';
+        w4PdfData = ''; w4PdfName = '';
+        ['file-w1-input', 'file-w2-input', 'file-w4-input'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        document.getElementById('preview-box-w1')?.classList.add('hidden');
+        const labelW1 = document.getElementById('label-w1-file');
+        const labelW2 = document.getElementById('label-w2-file');
+        const labelW4 = document.getElementById('label-w4-file');
+        if (labelW1) labelW1.innerText = '주인공 이미지 파일 선택하기';
+        if (labelW2) labelW2.innerText = 'PDF 또는 대표 이미지 선택';
+        if (labelW4) labelW4.innerText = '최종 동화책 PDF 파일 올리기';
+        const nameW2 = document.getElementById('file-w2-name');
+        const nameW4 = document.getElementById('file-w4-name');
+        if (nameW2) nameW2.innerText = '';
+        if (nameW4) nameW4.innerText = '';
+      };
+
+      // data:image/jpeg;base64,... 에서 실제 파일 형식 추출
+      function mimeFromDataUrl(dataUrl, fallback) {
+        const m = /^data:([^;,]+)[;,]/.exec(dataUrl || '');
+        return m ? m[1] : fallback;
+      }
+
       const fileW1 = document.getElementById('file-w1-input');
       fileW1?.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -2368,9 +2510,29 @@ function doPost(e) {
           return;
         }
 
+        if (isSeatLockedByOtherDevice()) {
+          playSound('click');
+          showToast('⚠️ 친구가 확정한 좌석이에요. 먼저 내 좌석 번호를 골라주세요!', false);
+          return;
+        }
+
         const s = studentsData[currentSeat];
         const studentName = s.name || `작가 ${currentSeat}`;
         const week = currentWeekMode;
+
+        // 빈 제출 방지 (아무것도 적지 않고 누르면 안내)
+        const val = (id) => document.getElementById(id)?.value.trim() || '';
+        const prevSub = s.submissions[week] || {};
+        const hasContent = week === 'week-1'
+          ? Boolean(val('input-w1-intro') || w1FileData || prevSub.fileData)
+          : week === 'week-2'
+            ? Boolean(val('input-w2-summary') || val('input-w2-link') || w2FileData || prevSub.fileData)
+            : Boolean(val('input-w4-line') || val('input-w4-link') || w4PdfData || prevSub.pdfData);
+        if (!hasContent) {
+          playSound('click');
+          showToast('✏️ 먼저 내용을 적거나 파일을 넣어주세요!', false);
+          return;
+        }
 
         let gdrivePayload = {
           seat: currentSeat,
@@ -2395,7 +2557,7 @@ function doPost(e) {
           gdrivePayload.note = intro;
           gdrivePayload.fileName = s.submissions['week-1'].fileName || '주인공캐릭터.png';
           gdrivePayload.fileBase64 = s.submissions['week-1'].fileData;
-          gdrivePayload.mimeType = 'image/png';
+          gdrivePayload.mimeType = mimeFromDataUrl(gdrivePayload.fileBase64, 'image/png');
         } else if (week === 'week-2') {
           const summary = document.getElementById('input-w2-summary')?.value.trim() || '';
           const linkUrl = document.getElementById('input-w2-link')?.value.trim() || '';
@@ -2410,7 +2572,7 @@ function doPost(e) {
           gdrivePayload.linkUrl = linkUrl;
           gdrivePayload.fileName = s.submissions['week-2'].fileName || '동화초안.pdf';
           gdrivePayload.fileBase64 = s.submissions['week-2'].fileData;
-          gdrivePayload.mimeType = (s.submissions['week-2'].fileName?.endsWith('.pdf')) ? 'application/pdf' : 'image/jpeg';
+          gdrivePayload.mimeType = mimeFromDataUrl(gdrivePayload.fileBase64, 'application/pdf');
         } else {
           const recitationLine = document.getElementById('input-w4-line')?.value.trim() || '';
           const linkUrl = document.getElementById('input-w4-link')?.value.trim() || '';
@@ -2764,6 +2926,8 @@ function doPost(e) {
           } else if (msg.type === 'CURRICULUM_CONTROL' && msg.curriculum) {
             globalCurriculumState = msg.curriculum;
             applyCurriculumControl(globalCurriculumState.week, globalCurriculumState.allowStudentSwitch, false);
+          } else if (msg.type === 'CLASS_RESET') {
+            applyClassReset(msg.resetAt);
           } else if (msg.type === 'SHUTTER_CONTROL') {
             isDriveShutterActive = msg.isShutterActive;
             updateShutterUI();
@@ -2868,6 +3032,11 @@ function doPost(e) {
             setStoredGdriveShutterState(isDriveShutterActive);
             updateShutterUI();
           }
+        });
+
+        const sessionDoc = fs.doc(db, 'artifacts', appId, 'config', 'session');
+        fs.onSnapshot(sessionDoc, (docSnap) => {
+          if (docSnap.exists()) applyClassReset(docSnap.data().resetAt);
         });
 
         const gdriveDoc = fs.doc(db, 'artifacts', appId, 'config', 'gdrive');
