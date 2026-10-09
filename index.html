@@ -1146,9 +1146,11 @@
       renderWeeklySubmissionUI(currentWeekMode);
     }
 
+    // 모든 기기(학생 개인 기기 포함)에 적용되는 기본 선생님 비밀번호
+    const DEFAULT_TEACHER_PIN = '2026AI';
     const PIN_STORAGE_KEY = 'hwajeong_teacher_pin_code';
     function getStoredTeacherPin() {
-      return localStorage.getItem(PIN_STORAGE_KEY) || '7777';
+      return localStorage.getItem(PIN_STORAGE_KEY) || DEFAULT_TEACHER_PIN;
     }
     function setStoredTeacherPin(newPin) {
       localStorage.setItem(PIN_STORAGE_KEY, newPin);
