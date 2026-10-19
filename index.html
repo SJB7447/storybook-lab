@@ -259,7 +259,7 @@
             <div class="bg-white border-2 border-emerald-200 rounded-2xl p-3.5 shadow-sm card-bounce">
               <div class="flex items-center gap-2 mb-2">
                 <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 font-jua text-xs flex items-center justify-center">2-2</span>
-                <h4 class="font-jua text-sm text-slate-800">그곳의 날씨나 시간대는? ⛅</h4>
+                <h4 class="font-jua text-sm text-slate-800">그곳의 날씨나 시간대는? ⛅ <span class="text-[10px] font-sans font-bold text-slate-400">(더 꾸미고 싶으면)</span></h4>
               </div>
               <input id="input-weather" type="text" placeholder="예: 별빛이 은하수처럼 쏟아지는 신비로운 밤"
                 class="w-full text-sm font-bold p-2.5 bg-emerald-50/40 rounded-xl border border-emerald-200 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" />
@@ -300,7 +300,7 @@
             <div class="bg-white border-2 border-indigo-200 rounded-2xl p-3.5 shadow-sm card-bounce">
               <div class="flex items-center gap-2 mb-2">
                 <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-jua text-xs flex items-center justify-center">3-2</span>
-                <h4 class="font-jua text-sm text-slate-800">이야기의 행복한 결말이나 목표는? 💖</h4>
+                <h4 class="font-jua text-sm text-slate-800">이야기의 행복한 결말이나 목표는? 💖 <span class="text-[10px] font-sans font-bold text-slate-400">(더 꾸미고 싶으면)</span></h4>
               </div>
               <input id="input-ending" type="text" placeholder="예: 숲속 친구들과 함께 맛있는 파티를 열고 환하게 웃어요"
                 class="w-full text-sm font-bold p-2.5 bg-indigo-50/40 rounded-xl border border-indigo-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition" />
@@ -1471,7 +1471,7 @@ function doPost(e) {
 
       if (ending) storyPrompt += `이야기의 끝은 ${ending} 따뜻하고 감동적인 마무리입니다. `;
 
-      storyPrompt += `초등학교 저학년을 위한 5~8장면짜리 동화책(Storybook)을 만들어주세요. `;
+      storyPrompt += `처음 → 사건 → 해결 → 마지막 순서로, 초등학교 저학년을 위한 4~5장면짜리 동화책(Storybook)을 만들어주세요. `;
       storyPrompt += `모든 장면의 그림 스타일은 일관되게 '${currentStyle}'로 그려주세요.`;
 
       return storyPrompt;
