@@ -151,16 +151,19 @@
 
       <!-- 5-Week Curriculum Bridge Selector -->
       <div class="bg-white rounded-2xl p-2 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-1">
+        <div class="flex flex-wrap items-center gap-1">
           <span class="text-xs font-bold text-slate-400 px-2">오늘의 수업 단계:</span>
           <button type="button" id="tab-week-1" class="btn-week-tab active px-3 py-1.5 rounded-xl text-xs font-jua transition bg-amber-500 text-white shadow-sm flex items-center gap-1">
             <span>🐻 1주차: 주인공 캐릭터 소환</span>
           </button>
           <button type="button" id="tab-week-2" class="btn-week-tab px-3 py-1.5 rounded-xl text-xs font-jua transition bg-slate-100 hover:bg-amber-100 text-slate-700 flex items-center gap-1">
-            <span>📖 2~3주차: 동화책 전체 주문서</span>
+            <span>📖 2주차: 이야기 주문서</span>
+          </button>
+          <button type="button" id="tab-week-3" class="btn-week-tab px-3 py-1.5 rounded-xl text-xs font-jua transition bg-slate-100 hover:bg-amber-100 text-slate-700 flex items-center gap-1">
+            <span>✏️ 3주차: 이야기 고치기</span>
           </button>
           <button type="button" id="tab-week-4" class="btn-week-tab px-3 py-1.5 rounded-xl text-xs font-jua transition bg-slate-100 hover:bg-amber-100 text-slate-700 flex items-center gap-1">
-            <span>🎤 4~5주차: 꼬마 성우 & 작품 발표</span>
+            <span>📕 4~5주차: 완성 & 발표</span>
           </button>
         </div>
         <div class="flex items-center gap-2">
@@ -172,6 +175,12 @@
             💡 질문을 하나씩 채워보세요!
           </div>
         </div>
+      </div>
+
+      <!-- Story order read-only notice (3주차, 4~5주차) -->
+      <div id="banner-story-readonly" class="hidden bg-sky-50 border border-sky-200 text-sky-900 rounded-2xl px-4 py-2.5 text-xs font-bold flex items-center gap-2">
+        <i class="fa-solid fa-book-open-reader text-sky-600"></i>
+        <span>📖 2주차에 쓴 내 이야기 주문서예요. 지금은 보기만 할 수 있어요. (고칠 점은 아래 상자에 적어요!)</span>
       </div>
 
       <!-- Granular 7-Step Step-by-Step Prompt Cards -->
@@ -490,7 +499,7 @@
               <span class="text-[10px] text-slate-400 mt-1 block">💡 제미나이 우측 상단 '공유' 버튼을 눌러 복사한 링크를 넣으세요.</span>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">방법 B: 동화책 초안 파일 (PDF 또는 캡처 이미지)</label>
+              <label class="block text-xs font-bold text-slate-600 mb-1">방법 B: 동화책 초안 파일 (PPT·PDF·이미지)</label>
               <label class="cursor-pointer flex flex-col items-center justify-center p-2.5 border-2 border-dashed border-indigo-200 hover:border-indigo-400 rounded-2xl bg-indigo-50/40 hover:bg-indigo-50 transition text-indigo-700">
                 <i class="fa-solid fa-file-pdf text-lg mb-0.5 text-indigo-500"></i>
                 <span class="text-xs font-bold" id="label-w2-file">파일 선택 (여러 개 가능: PPT·PDF·이미지)</span>
@@ -501,31 +510,119 @@
           </div>
         </div>
 
-        <!-- Week 4~5 Form: Final Book PDF / Link and Recitation Line -->
-        <div id="form-week-4" class="submission-week-form space-y-3 hidden">
+        <!-- Week 3 Form: Revising the story -->
+        <div id="form-week-3" class="submission-week-form space-y-3 hidden">
+          <div class="p-3 rounded-2xl bg-sky-50 border border-sky-200 space-y-2">
+            <p class="text-xs font-bold text-sky-900">✏️ 고칠 말 만들기: <span class="text-sky-700">장면 → 무엇을 → 어떻게</span> 고르고 [추가]를 눌러요</p>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <select id="w3-scene" class="text-xs font-bold border border-sky-300 rounded-lg px-2 py-1.5 bg-white">
+                <option value="1번째 장면(처음)">1번째 장면 (처음)</option>
+                <option value="2번째 장면(사건)">2번째 장면 (사건)</option>
+                <option value="3번째 장면(해결)">3번째 장면 (해결)</option>
+                <option value="4번째 장면(마지막)">4번째 장면 (마지막)</option>
+                <option value="5번째 장면">5번째 장면</option>
+                <option value="모든 장면">모든 장면</option>
+              </select>
+              <select id="w3-target" class="text-xs font-bold border border-sky-300 rounded-lg px-2 py-1.5 bg-white">
+                <option value="주인공">주인공</option>
+                <option value="주인공 표정">주인공 표정</option>
+                <option value="친구들">친구들</option>
+                <option value="배경">배경</option>
+                <option value="색깔">색깔</option>
+                <option value="이야기 글">이야기 글</option>
+              </select>
+              <select id="w3-how" class="text-xs font-bold border border-sky-300 rounded-lg px-2 py-1.5 bg-white">
+                <option value="더 용감하게">더 용감하게</option>
+                <option value="더 재미있게">더 재미있게</option>
+                <option value="더 밝게">더 밝게</option>
+                <option value="더 귀엽게">더 귀엽게</option>
+                <option value="더 신비롭게">더 신비롭게</option>
+                <option value="더 짧고 쉬운 글로">더 짧고 쉬운 글로</option>
+                <option value="__custom__">✍️ 직접 쓸래요</option>
+              </select>
+              <input id="w3-how-custom" type="text" maxlength="30" placeholder="예: 무지개색으로"
+                class="hidden text-xs font-bold border border-sky-300 rounded-lg px-2 py-1.5 w-36" />
+              <button id="btn-w3-add" type="button" class="text-xs font-jua bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg transition active:scale-95">
+                ➕ 고칠 말 추가
+              </button>
+            </div>
+          </div>
           <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">
-              🎤 꼬마 성우 낭독 문장 (발표회에서 내 목소리로 낭독할 가장 멋진 명대사)
-            </label>
-            <textarea id="input-w4-line" rows="2" placeholder="예: '친구들아, 포기하지 마! 우리에겐 별빛 지팡이가 있잖아!' 또또는 환하게 웃으며 밤하늘로 날아올랐어요."
+            <label class="block text-xs font-bold text-slate-600 mb-1">내가 쓴 고칠 말 (한 줄에 하나씩, 직접 고쳐 써도 돼요)</label>
+            <textarea id="input-w3-revisions" rows="3" placeholder="예: 2번째 장면(사건)에서 주인공을 더 용감하게 바꿔 줘."
               class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-medium focus:border-indigo-500 outline-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">고치기 전과 뒤를 비교해 보니 어떤 게 더 마음에 들어요?</label>
+            <select id="input-w3-choice" class="text-xs font-bold border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
+              <option value="">골라 주세요</option>
+              <option value="after">✨ 고친 뒤가 더 좋아요</option>
+              <option value="before">📖 고치기 전이 더 좋아요</option>
+              <option value="both">💖 둘 다 좋아요</option>
+            </select>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">최종 완성 동화책 PDF 파일</label>
-              <label class="cursor-pointer flex flex-col items-center justify-center p-2.5 border-2 border-dashed border-purple-200 hover:border-purple-400 rounded-2xl bg-purple-50/40 hover:bg-purple-50 transition text-purple-700">
-                <i class="fa-solid fa-file-arrow-up text-lg mb-0.5 text-purple-600"></i>
-                <span class="text-xs font-bold" id="label-w4-file">최종 동화책 PDF 파일 올리기</span>
-                <input id="file-w4-input" type="file" accept=".pdf" class="hidden" />
-              </label>
-              <span id="file-w4-name" class="text-[11px] text-purple-600 font-bold truncate mt-1 block"></span>
+              <label class="block text-xs font-bold text-slate-600 mb-1">고친 동화책 제미나이 링크(URL)</label>
+              <input id="input-w3-link" type="url" placeholder="https://gemini.google.com/share/..."
+                class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-mono focus:border-indigo-500 outline-none" />
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">온라인 동화책 링크 (북크리에이터 또는 캔바 URL)</label>
-              <input id="input-w4-link" type="url" placeholder="https://read.bookcreator.com/... 또는 캔바 링크"
-                class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-mono focus:border-indigo-500 outline-none" />
-              <span class="text-[10px] text-slate-400 mt-1 block">💡 PDF 대신 온라인 공유 링크를 제출해도 좋습니다.</span>
+              <label class="block text-xs font-bold text-slate-600 mb-1">마음에 쏙 드는 글·장면 그림 (PPT·PDF·이미지)</label>
+              <label class="cursor-pointer flex flex-col items-center justify-center p-2.5 border-2 border-dashed border-sky-200 hover:border-sky-400 rounded-2xl bg-sky-50/40 hover:bg-sky-50 transition text-sky-700">
+                <i class="fa-solid fa-images text-lg mb-0.5 text-sky-500"></i>
+                <span class="text-xs font-bold" id="label-w3-file">파일 선택 (여러 개 가능: PPT·PDF·이미지)</span>
+                <input id="file-w3-input" type="file" multiple accept=".pdf,.ppt,.pptx,image/*,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" class="hidden" />
+              </label>
+              <span id="file-w3-name" class="text-[11px] text-sky-700 font-bold mt-1 block break-all"></span>
             </div>
+          </div>
+        </div>
+
+        <!-- Week 4~5 Form: Finished book (cover checklist), files/link, recitation line -->
+        <div id="form-week-4" class="submission-week-form space-y-3 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">📕 동화책 제목 (표지에 들어가요)</label>
+              <input id="input-book-title" type="text" maxlength="40" placeholder="예: 달이와 빛나는 도토리"
+                class="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-bold focus:border-indigo-500 outline-none" />
+              <span class="text-[10px] text-slate-400 mt-1 block">💡 제목을 적으면 위에 [표지 만들기 마법 주문]이 완성돼요.</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200">
+              <p class="text-xs font-bold text-amber-900 mb-1.5">✅ 진짜 동화책 체크리스트</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] font-bold text-slate-700">
+                <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" class="w4-check accent-amber-500" data-key="title" /> 표지에 제목을 넣었어요</label>
+                <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" class="w4-check accent-amber-500" data-key="author" /> 작가 이름을 넣었어요</label>
+                <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" class="w4-check accent-amber-500" data-key="cover" /> 대표 그림을 골랐어요</label>
+                <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" class="w4-check accent-amber-500" data-key="order" /> 장면 순서가 맞아요</label>
+                <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" class="w4-check accent-amber-500" data-key="missing" /> 빠진 장면이 없어요</label>
+                <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" class="w4-check accent-amber-500" data-key="bigtext" /> 글씨를 크게 했어요</label>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">완성 동화책 파일 (PPT·PDF·이미지, 여러 개 가능)</label>
+              <label class="cursor-pointer flex flex-col items-center justify-center p-2.5 border-2 border-dashed border-purple-200 hover:border-purple-400 rounded-2xl bg-purple-50/40 hover:bg-purple-50 transition text-purple-700">
+                <i class="fa-solid fa-file-arrow-up text-lg mb-0.5 text-purple-600"></i>
+                <span class="text-xs font-bold" id="label-w4-file">파일 선택 (여러 개 가능: PPT·PDF·이미지)</span>
+                <input id="file-w4-input" type="file" multiple accept=".pdf,.ppt,.pptx,image/*,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" class="hidden" />
+              </label>
+              <span id="file-w4-name" class="text-[11px] text-purple-600 font-bold mt-1 block break-all"></span>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">온라인 동화책 링크 (제미나이·북크리에이터·캔바 URL)</label>
+              <input id="input-w4-link" type="url" placeholder="https://gemini.google.com/share/... 또는 캔바 링크"
+                class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-mono focus:border-indigo-500 outline-none" />
+              <span class="text-[10px] text-slate-400 mt-1 block">💡 파일 대신 온라인 공유 링크를 제출해도 좋아요.</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">
+              🎤 5주차 발표: 내 목소리로 읽을 가장 멋진 문장
+            </label>
+            <textarea id="input-w4-line" rows="2" placeholder="예: '바람아, 고마워!' 달이는 무지개 나무 아래에서 환하게 웃었어요."
+              class="w-full p-2.5 border border-slate-300 rounded-xl text-xs md:text-sm font-medium focus:border-indigo-500 outline-none"></textarea>
           </div>
         </div>
 
@@ -656,10 +753,13 @@
               🐻 1주차만 열기 (캐릭터)
             </button>
             <button id="btn-teacher-set-week2" class="teacher-curriculum-btn px-3 py-1.5 rounded-xl text-xs font-jua bg-white hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition">
-              📖 2~3주차 열기 (전체 주문서)
+              📖 2주차 열기 (이야기 주문서)
+            </button>
+            <button id="btn-teacher-set-week3" class="teacher-curriculum-btn px-3 py-1.5 rounded-xl text-xs font-jua bg-white hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition">
+              ✏️ 3주차 열기 (이야기 고치기)
             </button>
             <button id="btn-teacher-set-week4" class="teacher-curriculum-btn px-3 py-1.5 rounded-xl text-xs font-jua bg-white hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition">
-              🎤 4~5주차 열기 (발표 및 낭독)
+              📕 4~5주차 열기 (완성 & 발표)
             </button>
             <button id="btn-teacher-set-free" class="teacher-curriculum-btn px-3 py-1.5 rounded-xl text-xs font-jua bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 transition" title="학생들이 원하는 탭을 자유롭게 눌러볼 수 있도록 잠금을 풉니다">
               🔓 학생 자유 선택 허용
@@ -752,7 +852,7 @@
             <i class="fa-solid fa-folder-open"></i> 주차별 제출 작품 및 발표 자료
           </h4>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- 1주차 캐릭터 제출본 -->
             <div class="p-3 rounded-2xl bg-amber-50/50 border border-amber-200">
               <span class="text-[11px] font-bold text-amber-800 block mb-1">🐻 1주차: 주인공 캐릭터</span>
@@ -763,15 +863,23 @@
 
             <!-- 2~3주차 동화 초안 제출본 -->
             <div class="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-200">
-              <span class="text-[11px] font-bold text-emerald-800 block mb-1">📖 2~3주차: 동화책 초안</span>
+              <span class="text-[11px] font-bold text-emerald-800 block mb-1">📖 2주차: 동화책 초안</span>
               <div id="spotlight-w2-content" class="text-xs text-slate-600">
+                <span class="text-slate-400">제출 내역 없음</span>
+              </div>
+            </div>
+
+            <!-- 3주차 고친 동화 -->
+            <div class="p-3 rounded-2xl bg-sky-50/50 border border-sky-200">
+              <span class="text-[11px] font-bold text-sky-800 block mb-1">✏️ 3주차: 이야기 고치기</span>
+              <div id="spotlight-w3-content" class="text-xs text-slate-600">
                 <span class="text-slate-400">제출 내역 없음</span>
               </div>
             </div>
 
             <!-- 4~5주차 최종 및 낭독 문장 -->
             <div class="p-3 rounded-2xl bg-indigo-50/50 border border-indigo-200">
-              <span class="text-[11px] font-bold text-indigo-800 block mb-1">🎤 4~5주차: 낭독 & 최종본</span>
+              <span class="text-[11px] font-bold text-indigo-800 block mb-1">📕 4~5주차: 완성 동화책 & 낭독</span>
               <div id="spotlight-w4-content" class="text-xs text-slate-600">
                 <span class="text-slate-400">제출 내역 없음</span>
               </div>
@@ -1158,6 +1266,7 @@
       const sub = copy.submissions || {};
       if (sub['week-1']) sub['week-1'].fileData = '';
       if (sub['week-2']) sub['week-2'].fileData = '';
+      if (sub['week-3']) sub['week-3'].fileData = '';
       if (sub['week-4']) sub['week-4'].pdfData = '';
       return copy;
     }
@@ -1253,9 +1362,13 @@
         style: '포근하고 따뜻한 수채화 동화책 일러스트',
         prompt: '',
         status: 'idle',
+        bookTitle: '',
+        revisionNotes: '',
+        coverChecklist: {},
         submissions: {
           'week-1': { intro: '', fileData: '', fileName: '', timestamp: 0 },
           'week-2': { summary: '', linkUrl: '', fileData: '', fileName: '', timestamp: 0 },
+          'week-3': { revisionNotes: '', choice: '', linkUrl: '', fileData: '', fileName: '', fileNames: [], timestamp: 0 },
           'week-4': { recitationLine: '', pdfData: '', pdfName: '', linkUrl: '', timestamp: 0 }
         },
         updatedAt: Date.now()
@@ -1269,6 +1382,7 @@
        각 기기는 자기 기기에 남은 좌석 기억/작성 기록을 지웁니다. */
     const RESET_AT_KEY = 'hwajeong_last_reset_at';
     let clearPendingFileSelections = () => {};
+    let highlightTeacherCurriculumBtn = () => {};
 
     /* resetData=true 는 초기화를 누른 선생님 기기에서만 사용합니다.
        다른 기기는 기기에 남은 기록만 지우고, 학생 데이터는 선생님이 비워 둔
@@ -1431,6 +1545,26 @@ function doPost(e) {
       }
     }
 
+    const WEEK_LABELS = {
+      'week-1': '1주차',
+      'week-2': '2주차',
+      'week-3': '3주차',
+      'week-4': '4~5주차'
+    };
+
+    /* 받침에 따라 을/를, 이/가 고르기 (한글이 아니면 '을(를)'처럼 둘 다 표시) */
+    function josa(word, withFinal, withoutFinal) {
+      const ch = String(word || '').trim().slice(-1);
+      const code = ch.charCodeAt(0);
+      if (!(code >= 0xAC00 && code <= 0xD7A3)) return `${withFinal}(${withoutFinal})`;
+      return (code - 0xAC00) % 28 !== 0 ? withFinal : withoutFinal;
+    }
+
+    function getRevisionLines() {
+      return (document.getElementById('input-w3-revisions')?.value || '')
+        .split('\n').map(l => l.trim()).filter(Boolean);
+    }
+
     function buildPrompt() {
       const hero = document.getElementById('input-hero')?.value.trim() || '';
       const traits = document.getElementById('input-traits')?.value.trim() || '';
@@ -1451,6 +1585,31 @@ function doPost(e) {
         charPrompt += `정면과 측면 모습이 밝고 사랑스럽게 표현된 단독 캐릭터 시트를 그려주세요. `;
         charPrompt += `그림 스타일은 '${currentStyle}'로 그려주세요.`;
         return charPrompt;
+      }
+
+      if (currentWeekMode === 'week-3') {
+        const lines = getRevisionLines();
+        if (!lines.length) {
+          return "아래 [고칠 말 만들기]에서 장면과 고칠 점을 골라 [추가]를 눌러 보세요. 제미나이에게 보낼 고치기 주문이 완성됩니다!";
+        }
+        return `내가 만든 동화책을 이렇게 고쳐 주세요.\n`
+          + lines.map((l, i) => `${i + 1}. ${l}`).join('\n')
+          + `\n고치라고 하지 않은 장면의 이야기와 그림 스타일('${currentStyle}')은 그대로 유지해 주세요.`;
+      }
+
+      if (currentWeekMode === 'week-4') {
+        const title = document.getElementById('input-book-title')?.value.trim() || '';
+        const author = document.getElementById('student-name-input')?.value.trim() || studentsData[currentSeat]?.name || '';
+        if (!title) {
+          return "아래 [동화책 제목]을 적으면 표지를 만드는 마법 주문이 완성돼요!";
+        }
+        let coverPrompt = `내 동화책의 표지를 만들어 주세요. 제목은 "${title}"`;
+        coverPrompt += author ? `, 작가 이름은 "${author}"입니다. ` : `입니다. `;
+        if (hero && place) coverPrompt += `표지 그림에는 [${hero}]${josa(hero, '이', '가')} [${place}]에 있는 모습을 크게 그려 주세요. `;
+        else if (hero) coverPrompt += `표지 그림에는 [${hero}]의 모습을 크게 그려 주세요. `;
+        coverPrompt += `제목과 작가 이름은 크고 읽기 쉬운 글씨로 넣어 주세요. `;
+        coverPrompt += `그림 스타일은 '${currentStyle}'로 그려 주세요.`;
+        return coverPrompt;
       }
 
       if (!hero && !place && !mission) {
@@ -1500,9 +1659,16 @@ function doPost(e) {
       }
 
       const sub = studentsData[currentSeat]?.submissions;
-      if (sub && (sub['week-1']?.fileData || sub['week-2']?.linkUrl || sub['week-2']?.fileData || sub['week-4']?.pdfData || sub['week-4']?.linkUrl)) {
+      if (sub && (sub['week-1']?.fileData || sub['week-2']?.linkUrl || sub['week-2']?.fileData
+        || sub['week-3']?.linkUrl || sub['week-3']?.fileData || sub['week-3']?.revisionNotes
+        || sub['week-4']?.pdfData || sub['week-4']?.linkUrl)) {
         status = 'done';
       }
+
+      const coverChecklist = {};
+      document.querySelectorAll('.w4-check').forEach(c => {
+        coverChecklist[c.getAttribute('data-key')] = c.checked;
+      });
 
       studentsData[currentSeat] = {
         ...studentsData[currentSeat],
@@ -1516,6 +1682,9 @@ function doPost(e) {
         ending: document.getElementById('input-ending')?.value.trim() || '',
         style: currentStyle,
         prompt: prompt,
+        bookTitle: document.getElementById('input-book-title')?.value.trim() || '',
+        revisionNotes: document.getElementById('input-w3-revisions')?.value || '',
+        coverChecklist: coverChecklist,
         status: status,
         updatedAt: Date.now()
       };
@@ -1538,8 +1707,16 @@ function doPost(e) {
       }
     }
 
-    const STUDENT_EDITABLE_IDS = ['input-hero', 'input-traits', 'input-item', 'input-place', 'input-weather', 'input-mission', 'input-ending',
-      'input-w1-intro', 'input-w2-summary', 'input-w2-link', 'input-w4-line', 'input-w4-link', 'file-w1-input', 'file-w2-input', 'file-w4-input'];
+    const STORY_INPUT_IDS = ['input-hero', 'input-traits', 'input-item', 'input-place', 'input-weather', 'input-mission', 'input-ending'];
+    const STUDENT_EDITABLE_IDS = [...STORY_INPUT_IDS,
+      'input-w1-intro', 'input-w2-summary', 'input-w2-link', 'input-w4-line', 'input-w4-link', 'file-w1-input', 'file-w2-input', 'file-w4-input',
+      'input-w3-revisions', 'input-w3-choice', 'input-w3-link', 'file-w3-input', 'w3-scene', 'w3-target', 'w3-how', 'w3-how-custom', 'btn-w3-add',
+      'input-book-title'];
+
+    /* 3주차·4~5주차에는 2주차에 쓴 이야기 주문서를 보기 전용으로 둡니다 */
+    function isStoryReadOnlyWeek() {
+      return currentWeekMode === 'week-3' || currentWeekMode === 'week-4';
+    }
 
     function updateStudentLockUI() {
       const s = studentsData[currentSeat];
@@ -1550,10 +1727,18 @@ function doPost(e) {
       const badgeText = badgeLocked?.querySelector('span');
       const lockedByOther = isSeatLockedByOtherDevice();
 
+      const storyReadOnly = isStoryReadOnlyWeek();
       STUDENT_EDITABLE_IDS.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.disabled = lockedByOther;
+        if (el) el.disabled = lockedByOther || (storyReadOnly && STORY_INPUT_IDS.includes(id));
       });
+      document.querySelectorAll('.w4-check').forEach(c => { c.disabled = lockedByOther; });
+      document.querySelectorAll('.btn-quick-chip, .btn-style-choice').forEach(btn => {
+        btn.disabled = lockedByOther || storyReadOnly;
+        btn.classList.toggle('opacity-50', lockedByOther || storyReadOnly);
+        btn.classList.toggle('pointer-events-none', lockedByOther || storyReadOnly);
+      });
+      document.getElementById('banner-story-readonly')?.classList.toggle('hidden', !storyReadOnly);
       if (badgeText) badgeText.innerText = lockedByOther ? '친구가 쓰는 좌석이에요. 내 좌석 번호를 골라주세요!' : '확정됨';
 
       if (lockedByOther) {
@@ -1678,9 +1863,12 @@ function doPost(e) {
           submitBtn.className = "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-jua text-sm md:text-base py-2.5 px-6 rounded-xl shadow-md transition flex items-center gap-2 active:scale-95 cursor-pointer";
         }
         if (submitBtnText) {
-          submitBtnText.innerText = currentWeekMode === 'week-1'
-            ? "선생님 화면 & 구글 드라이브로 1주차 캐릭터 전송"
-            : (currentWeekMode === 'week-2' ? "선생님 화면 & 구글 드라이브로 2~3주차 초안 전송" : "선생님 화면 & 구글 드라이브로 최종 완성본 전송");
+          submitBtnText.innerText = {
+            'week-1': "선생님 화면 & 구글 드라이브로 1주차 캐릭터 전송",
+            'week-2': "선생님 화면 & 구글 드라이브로 2주차 초안 전송",
+            'week-3': "선생님 화면 & 구글 드라이브로 3주차 고친 동화 전송",
+            'week-4': "선생님 화면 & 구글 드라이브로 완성 동화책 전송"
+          }[currentWeekMode] || "선생님 화면 & 구글 드라이브로 과제 전송하기";
         }
         if (submitIcon) submitIcon.className = "fa-solid fa-paper-plane";
       } else {
@@ -1702,6 +1890,7 @@ function doPost(e) {
     function renderWeeklySubmissionUI(week) {
       const formW1 = document.getElementById('form-week-1');
       const formW2 = document.getElementById('form-week-2');
+      const formW3 = document.getElementById('form-week-3');
       const formW4 = document.getElementById('form-week-4');
       const titleEl = document.getElementById('submission-step-title');
       const descEl = document.getElementById('submission-step-desc');
@@ -1728,13 +1917,14 @@ function doPost(e) {
         }
       }
 
-      [formW1, formW2, formW4].forEach(f => {
+      [formW1, formW2, formW3, formW4].forEach(f => {
         if (f) f.classList.add('hidden');
       });
 
       const statusBadge = document.getElementById('badge-submission-status');
       const currentSub = s?.submissions?.[week];
-      const isDone = currentSub && (currentSub.fileData || currentSub.linkUrl || currentSub.intro || currentSub.recitationLine);
+      const isDone = currentSub && (currentSub.fileData || currentSub.pdfData || currentSub.linkUrl || currentSub.intro
+        || currentSub.summary || currentSub.revisionNotes || currentSub.recitationLine || currentSub.title);
 
       if (statusBadge) {
         if (isDone) {
@@ -1755,18 +1945,27 @@ function doPost(e) {
         if (introInput) introInput.value = currentSub?.intro || '';
       } else if (week === 'week-2') {
         if (formW2) formW2.classList.remove('hidden');
-        if (titleEl) titleEl.innerText = "📖 2~3주차 미션: 제미나이 Storybook 동화 초안 제출";
-        if (descEl) descEl.innerText = "제미나이 공유 링크 또는 초안 파일(PDF/이미지)을 등록하세요.";
+        if (titleEl) titleEl.innerText = "📖 2주차 미션: 4~5장면 동화책 초안 제출";
+        if (descEl) descEl.innerText = "제미나이 공유 링크 또는 초안 파일(PPT·PDF·이미지, 여러 개 가능)을 등록하세요.";
         if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-book-open"></i>';
         const summaryInput = document.getElementById('input-w2-summary');
         const linkInput = document.getElementById('input-w2-link');
         if (summaryInput) summaryInput.value = currentSub?.summary || '';
         if (linkInput) linkInput.value = currentSub?.linkUrl || '';
+      } else if (week === 'week-3') {
+        if (formW3) formW3.classList.remove('hidden');
+        if (titleEl) titleEl.innerText = "✏️ 3주차 미션: 고친 동화 제출";
+        if (descEl) descEl.innerText = "고칠 말과, 고친 뒤 마음에 쏙 드는 글·장면 그림(링크나 파일)을 등록하세요.";
+        if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+        const link3Input = document.getElementById('input-w3-link');
+        const choiceInput = document.getElementById('input-w3-choice');
+        if (link3Input) link3Input.value = currentSub?.linkUrl || '';
+        if (choiceInput) choiceInput.value = currentSub?.choice || '';
       } else {
         if (formW4) formW4.classList.remove('hidden');
-        if (titleEl) titleEl.innerText = "🎤 4~5주차 미션: 최종 완성된 동화책 & 낭독 발표 등록";
-        if (descEl) descEl.innerText = "최종 동화책 PDF 파일/링크와 낭독할 명대사를 등록해 발표를 준비하세요.";
-        if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>';
+        if (titleEl) titleEl.innerText = "📕 4~5주차 미션: 완성 동화책 & 낭독 발표";
+        if (descEl) descEl.innerText = "표지가 있는 완성 동화책(파일·링크)과 발표 때 읽을 문장을 등록하세요.";
+        if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-book"></i>';
         const lineInput = document.getElementById('input-w4-line');
         const link4Input = document.getElementById('input-w4-link');
         if (lineInput) lineInput.value = currentSub?.recitationLine || '';
@@ -1810,13 +2009,15 @@ function doPost(e) {
         const sub = s.submissions || {};
         const w1Done = Boolean(sub['week-1']?.fileData || sub['week-1']?.intro);
         const w2Done = Boolean(sub['week-2']?.linkUrl || sub['week-2']?.fileData);
+        const w3Done = Boolean(sub['week-3']?.linkUrl || sub['week-3']?.fileData || sub['week-3']?.revisionNotes);
         const w4Done = Boolean(sub['week-4']?.pdfData || sub['week-4']?.linkUrl || sub['week-4']?.recitationLine);
 
         const subPills = `
-          <div class="flex items-center gap-1 mt-1 text-[9px] font-bold">
+          <div class="flex flex-wrap items-center gap-1 mt-1 text-[9px] font-bold">
             <span class="px-1.5 py-0.5 rounded ${w1Done ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-400'}">1주:${w1Done ? '🐻완료' : '미제출'}</span>
             <span class="px-1.5 py-0.5 rounded ${w2Done ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-400'}">2주:${w2Done ? '📖완료' : '미제출'}</span>
-            <span class="px-1.5 py-0.5 rounded ${w4Done ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-400'}">4주:${w4Done ? '🎤완료' : '미제출'}</span>
+            <span class="px-1.5 py-0.5 rounded ${w3Done ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-400'}">3주:${w3Done ? '✏️완료' : '미제출'}</span>
+            <span class="px-1.5 py-0.5 rounded ${w4Done ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-400'}">4주:${w4Done ? '📕완료' : '미제출'}</span>
           </div>
         `;
 
@@ -1952,16 +2153,49 @@ function doPost(e) {
         }
       }
 
+      const w3El = document.getElementById('spotlight-w3-content');
+      if (w3El) {
+        const w3 = sub['week-3'];
+        if (w3 && (w3.revisionNotes || w3.linkUrl || w3.fileData || (w3.fileNames || []).length)) {
+          const choiceText = { after: '✨ 고친 뒤가 더 좋아요', before: '📖 고치기 전이 더 좋아요', both: '💖 둘 다 좋아요' }[w3.choice] || '';
+          let extra = '';
+          if (w3.linkUrl) {
+            extra += `<a href="${w3.linkUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-bold text-sky-700 bg-sky-100/70 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> 고친 동화 링크 열기</a>`;
+          }
+          if (w3.fileData && w3.fileData.startsWith('data:image/')) {
+            extra += `<img src="${w3.fileData}" alt="고친 장면" class="w-full h-24 object-cover rounded-xl border border-sky-200 mt-1" />`;
+          }
+          if ((w3.fileNames || []).length) {
+            extra += `<p class="text-[10px] text-slate-500 mt-1">📎 제출 파일 ${w3.fileNames.length}개: ${w3.fileNames.join(', ')}</p>`;
+          }
+          w3El.innerHTML = `
+            <p class="font-medium text-slate-800 whitespace-pre-line">${w3.revisionNotes || '고칠 말 없음'}</p>
+            ${choiceText ? `<p class="text-[11px] font-bold text-sky-700 mt-1">${choiceText}</p>` : ''}
+            ${extra}
+          `;
+        } else {
+          w3El.innerHTML = '<span class="text-slate-400">제출 내역 없음</span>';
+        }
+      }
+
       if (w4El) {
-        if (sub['week-4'] && (sub['week-4'].pdfData || sub['week-4'].linkUrl || sub['week-4'].recitationLine)) {
+        if (sub['week-4'] && (sub['week-4'].pdfData || sub['week-4'].linkUrl || sub['week-4'].recitationLine || sub['week-4'].title)) {
           let extra = '';
           if (sub['week-4'].pdfData) {
-            extra += `<a href="${sub['week-4'].pdfData}" download="${sub['week-4'].pdfName || '최종동화책.pdf'}" class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-700 bg-purple-100/70 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-file-pdf"></i> 최종 동화책 PDF</a>`;
+            extra += `<a href="${sub['week-4'].pdfData}" download="${sub['week-4'].pdfName || '최종동화책.pdf'}" class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-700 bg-purple-100/70 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-file-arrow-down"></i> ${sub['week-4'].pdfName || '완성 동화책'} 다운로드</a>`;
           }
           if (sub['week-4'].linkUrl) {
             extra += `<a href="${sub['week-4'].linkUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-100/70 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-book-open text-[9px]"></i> 전자책 링크 열기</a>`;
           }
+          const w4Names = sub['week-4'].fileNames || [];
+          if (w4Names.length > 1) {
+            extra += `<p class="text-[10px] text-slate-500 mt-1 w-full">📎 제출 파일 ${w4Names.length}개: ${w4Names.join(', ')}</p>`;
+          }
+          const checks = sub['week-4'].checklist || {};
+          const checkCount = Object.values(checks).filter(Boolean).length;
           w4El.innerHTML = `
+            ${sub['week-4'].title ? `<p class="font-jua text-sm text-indigo-900 mb-1">📕 ${sub['week-4'].title}</p>` : ''}
+            ${checkCount ? `<p class="text-[10px] font-bold text-amber-700 mb-1">✅ 체크리스트 ${checkCount}/6</p>` : ''}
             <p class="font-medium text-slate-800 italic bg-white p-2 rounded-xl border border-indigo-100 leading-snug">
               "${sub['week-4'].recitationLine || '낭독 문장 미입력'}"
             </p>
@@ -1978,6 +2212,7 @@ function doPost(e) {
     function applyCurriculumControl(week, allowStudentSwitch = false, isUserClick = false) {
       const tab1 = document.getElementById('tab-week-1');
       const tab2 = document.getElementById('tab-week-2');
+      const tab3 = document.getElementById('tab-week-3');
       const tab4 = document.getElementById('tab-week-4');
       const sectionPartB = document.getElementById('section-part-b');
       const sectionPartC = document.getElementById('section-part-c');
@@ -1986,7 +2221,7 @@ function doPost(e) {
       const syncText = document.getElementById('curriculum-sync-text');
 
       currentWeekMode = week;
-      [tab1, tab2, tab4].forEach(b => {
+      [tab1, tab2, tab3, tab4].forEach(b => {
         if (b) {
           b.classList.remove('bg-amber-500', 'text-white', 'shadow-sm');
           b.classList.add('bg-slate-100', 'text-slate-700');
@@ -2010,9 +2245,19 @@ function doPost(e) {
         }
         if (sectionPartB) sectionPartB.classList.remove('opacity-40');
         if (sectionPartC) sectionPartC.classList.remove('opacity-40');
-        if (promptTitle) promptTitle.innerText = "2~3주차: 제미나이 Storybook 마법 주문서";
+        if (promptTitle) promptTitle.innerText = "2주차: 제미나이 Storybook 마법 주문서";
         if (promptSubtitle) promptSubtitle.innerText = "1주차에 만든 캐릭터 사진을 첨부하고 이 전체 주문을 넣으면 동화책 완성!";
-        if (syncText) syncText.innerText = allowStudentSwitch ? "자유 모드 (2~3주차 선택됨)" : "선생님 지정 2~3주차 진행 중 🔒";
+        if (syncText) syncText.innerText = allowStudentSwitch ? "자유 모드 (2주차 선택됨)" : "선생님 지정 2주차 진행 중 🔒";
+      } else if (week === 'week-3') {
+        if (tab3) {
+          tab3.classList.add('bg-amber-500', 'text-white', 'shadow-sm');
+          tab3.classList.remove('bg-slate-100', 'text-slate-700');
+        }
+        if (sectionPartB) sectionPartB.classList.remove('opacity-40');
+        if (sectionPartC) sectionPartC.classList.remove('opacity-40');
+        if (promptTitle) promptTitle.innerText = "3주차: 이야기 고치기 마법 주문";
+        if (promptSubtitle) promptSubtitle.innerText = "제미나이에서 만든 동화책 대화창에 이 고치기 주문을 붙여넣어 보세요!";
+        if (syncText) syncText.innerText = allowStudentSwitch ? "자유 모드 (3주차 선택됨)" : "선생님 지정 3주차 진행 중 🔒";
       } else {
         if (tab4) {
           tab4.classList.add('bg-amber-500', 'text-white', 'shadow-sm');
@@ -2020,15 +2265,17 @@ function doPost(e) {
         }
         if (sectionPartB) sectionPartB.classList.remove('opacity-40');
         if (sectionPartC) sectionPartC.classList.remove('opacity-40');
-        if (promptTitle) promptTitle.innerText = "4~5주차: 꼬마 작가 낭독 & 출판 발표회";
-        if (promptSubtitle) promptSubtitle.innerText = "완성된 동화 그림과 멋진 문장을 아래 상자에 등록하고 선생님 화면으로 전송하세요!";
+        if (promptTitle) promptTitle.innerText = "4~5주차: 동화책 표지 만들기 마법 주문";
+        if (promptSubtitle) promptSubtitle.innerText = "제목을 적으면 표지 주문이 완성돼요. 완성 동화책과 발표 문장은 아래에 등록하세요!";
         if (syncText) syncText.innerText = allowStudentSwitch ? "자유 모드 (4~5주차 선택됨)" : "선생님 지정 4~5주차 진행 중 🔒";
       }
 
+      updateStudentLockUI();
       renderWeeklySubmissionUI(week);
       updateStudentPromptPreview(isUserClick);
+      highlightTeacherCurriculumBtn(week, allowStudentSwitch);
 
-      if (isUserClick && week === 'week-4') {
+      if (isUserClick && (week === 'week-3' || week === 'week-4')) {
         document.getElementById('section-student-submission')?.scrollIntoView({ behavior: 'smooth' });
       }
     }
@@ -2159,6 +2406,14 @@ function doPost(e) {
       document.getElementById('input-weather').value = s.weather || '';
       document.getElementById('input-mission').value = s.mission || '';
       document.getElementById('input-ending').value = s.ending || '';
+      const bookTitleInput = document.getElementById('input-book-title');
+      if (bookTitleInput) bookTitleInput.value = s.bookTitle || '';
+      const revisionsInput = document.getElementById('input-w3-revisions');
+      if (revisionsInput) revisionsInput.value = s.revisionNotes || '';
+      const checklist = s.coverChecklist || {};
+      document.querySelectorAll('.w4-check').forEach(c => {
+        c.checked = Boolean(checklist[c.getAttribute('data-key')]);
+      });
 
       currentStyle = s.style || '포근하고 따뜻한 수채화 동화책 일러스트';
       document.querySelectorAll('.btn-style-choice').forEach(btn => {
@@ -2425,7 +2680,7 @@ function doPost(e) {
       function handleStudentTabClick(targetWeek) {
         if (!globalCurriculumState.allowStudentSwitch && globalCurriculumState.week !== targetWeek) {
           playSound('click');
-          showToast(`🔒 지금은 선생님께서 지정하신 [${globalCurriculumState.week === 'week-1' ? '1주차' : globalCurriculumState.week === 'week-2' ? '2~3주차' : '4~5주차'}] 수업 시간입니다!`, false);
+          showToast(`🔒 지금은 선생님께서 지정하신 [${WEEK_LABELS[globalCurriculumState.week] || '1주차'}] 수업 시간입니다!`, false);
           return;
         }
         playSound('click');
@@ -2434,14 +2689,16 @@ function doPost(e) {
 
       document.getElementById('tab-week-1')?.addEventListener('click', () => handleStudentTabClick('week-1'));
       document.getElementById('tab-week-2')?.addEventListener('click', () => handleStudentTabClick('week-2'));
+      document.getElementById('tab-week-3')?.addEventListener('click', () => handleStudentTabClick('week-3'));
       document.getElementById('tab-week-4')?.addEventListener('click', () => handleStudentTabClick('week-4'));
 
       // Teacher Remote Curriculum Control Buttons
       const btnSetW1 = document.getElementById('btn-teacher-set-week1');
       const btnSetW2 = document.getElementById('btn-teacher-set-week2');
+      const btnSetW3 = document.getElementById('btn-teacher-set-week3');
       const btnSetW4 = document.getElementById('btn-teacher-set-week4');
       const btnSetFree = document.getElementById('btn-teacher-set-free');
-      const teacherCurriculumBtns = [btnSetW1, btnSetW2, btnSetW4, btnSetFree];
+      const teacherCurriculumBtns = [btnSetW1, btnSetW2, btnSetW3, btnSetW4, btnSetFree];
 
       function updateTeacherCurriculumBtnUI(activeBtn) {
         teacherCurriculumBtns.forEach(b => {
@@ -2456,6 +2713,15 @@ function doPost(e) {
         }
       }
 
+      // 새로고침하거나 다른 기기에서 주차가 바뀌어도 관제탑 버튼 강조를 맞춰 둠
+      highlightTeacherCurriculumBtn = (week, allowStudentSwitch) => {
+        if (allowStudentSwitch) {
+          updateTeacherCurriculumBtnUI(btnSetFree);
+          return;
+        }
+        updateTeacherCurriculumBtnUI({ 'week-1': btnSetW1, 'week-2': btnSetW2, 'week-3': btnSetW3, 'week-4': btnSetW4 }[week] || btnSetW1);
+      };
+
       btnSetW1?.addEventListener('click', () => {
         playSound('magic');
         updateTeacherCurriculumBtnUI(btnSetW1);
@@ -2469,7 +2735,15 @@ function doPost(e) {
         updateTeacherCurriculumBtnUI(btnSetW2);
         broadcastCurriculumControl('week-2', false);
         applyCurriculumControl('week-2', false, false);
-        showToast('📡 15명 학생 화면이 [📖 2~3주차: 전체 주문서]로 고정되었습니다.');
+        showToast('📡 15명 학생 화면이 [📖 2주차: 이야기 주문서]로 고정되었습니다.');
+      });
+
+      btnSetW3?.addEventListener('click', () => {
+        playSound('magic');
+        updateTeacherCurriculumBtnUI(btnSetW3);
+        broadcastCurriculumControl('week-3', false);
+        applyCurriculumControl('week-3', false, false);
+        showToast('📡 15명 학생 화면이 [✏️ 3주차: 이야기 고치기]로 고정되었습니다.');
       });
 
       btnSetW4?.addEventListener('click', () => {
@@ -2477,7 +2751,7 @@ function doPost(e) {
         updateTeacherCurriculumBtnUI(btnSetW4);
         broadcastCurriculumControl('week-4', false);
         applyCurriculumControl('week-4', false, false);
-        showToast('📡 15명 학생 화면이 [🎤 4~5주차: 낭독 및 발표]로 고정되었습니다.');
+        showToast('📡 15명 학생 화면이 [📕 4~5주차: 완성 & 발표]로 고정되었습니다.');
       });
 
       btnSetFree?.addEventListener('click', () => {
@@ -2503,7 +2777,8 @@ function doPost(e) {
       });
 
       // Typing Sound and Auto-Assembly Inputs
-      const inputIds = ['input-hero', 'input-traits', 'input-item', 'input-place', 'input-weather', 'input-mission', 'input-ending', 'student-name-input'];
+      const inputIds = ['input-hero', 'input-traits', 'input-item', 'input-place', 'input-weather', 'input-mission', 'input-ending', 'student-name-input',
+        'input-book-title', 'input-w3-revisions'];
       inputIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -2512,6 +2787,41 @@ function doPost(e) {
             updateStudentPromptPreview(true);
           });
         }
+      });
+
+      document.querySelectorAll('.w4-check').forEach(c => {
+        c.addEventListener('change', () => {
+          playSound('click');
+          updateStudentPromptPreview(true);
+        });
+      });
+
+      // 3주차 고칠 말 만들기
+      const w3How = document.getElementById('w3-how');
+      const w3HowCustom = document.getElementById('w3-how-custom');
+      w3How?.addEventListener('change', () => {
+        w3HowCustom?.classList.toggle('hidden', w3How.value !== '__custom__');
+        if (w3How.value === '__custom__') w3HowCustom?.focus();
+      });
+      document.getElementById('btn-w3-add')?.addEventListener('click', () => {
+        const scene = document.getElementById('w3-scene')?.value || '';
+        const target = document.getElementById('w3-target')?.value || '';
+        let how = w3How?.value || '';
+        if (how === '__custom__') {
+          how = w3HowCustom?.value.trim() || '';
+          if (!how) {
+            showToast('✍️ 어떻게 바꾸고 싶은지 직접 적어 주세요! (예: 무지개색으로)', false);
+            w3HowCustom?.focus();
+            return;
+          }
+        }
+        const sentence = `${scene}에서 ${target}${josa(target, '을', '를')} ${how} 바꿔 줘.`;
+        const ta = document.getElementById('input-w3-revisions');
+        if (ta) ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + sentence;
+        if (w3HowCustom) w3HowCustom.value = '';
+        playSound('magic');
+        updateStudentPromptPreview(true);
+        showToast(`✏️ "${sentence}" 추가!`);
       });
 
       // Quick Chips Click
@@ -2562,30 +2872,32 @@ function doPost(e) {
       });
 
       let w1FileData = '', w1FileName = '';
-      let w2FileData = '', w2FileName = '';
-      let w2ExtraFiles = []; // 2주차 두 번째 이후 파일들 [{ name, data }]
+      // 2·3·4주차에 이번에 새로 고른 파일들 [{ name, data }]
+      const pendingFiles = { 'week-2': [], 'week-3': [], 'week-4': [] };
+      const MULTI_FILE_INPUTS = {
+        'week-2': { input: 'file-w2-input', label: 'label-w2-file', names: 'file-w2-name' },
+        'week-3': { input: 'file-w3-input', label: 'label-w3-file', names: 'file-w3-name' },
+        'week-4': { input: 'file-w4-input', label: 'label-w4-file', names: 'file-w4-name' }
+      };
+      const MULTI_FILE_LABEL = '파일 선택 (여러 개 가능: PPT·PDF·이미지)';
       let isSubmitting = false;
-      let w4PdfData = '', w4PdfName = '';
 
       clearPendingFileSelections = () => {
         w1FileData = ''; w1FileName = '';
-        w2FileData = ''; w2FileName = ''; w2ExtraFiles = [];
-        w4PdfData = ''; w4PdfName = '';
-        ['file-w1-input', 'file-w2-input', 'file-w4-input'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.value = '';
-        });
+        const w1Input = document.getElementById('file-w1-input');
+        if (w1Input) w1Input.value = '';
         document.getElementById('preview-box-w1')?.classList.add('hidden');
         const labelW1 = document.getElementById('label-w1-file');
-        const labelW2 = document.getElementById('label-w2-file');
-        const labelW4 = document.getElementById('label-w4-file');
         if (labelW1) labelW1.innerText = '주인공 이미지 파일 선택하기';
-        if (labelW2) labelW2.innerText = '파일 선택 (여러 개 가능: PPT·PDF·이미지)';
-        if (labelW4) labelW4.innerText = '최종 동화책 PDF 파일 올리기';
-        const nameW2 = document.getElementById('file-w2-name');
-        const nameW4 = document.getElementById('file-w4-name');
-        if (nameW2) nameW2.innerText = '';
-        if (nameW4) nameW4.innerText = '';
+        Object.entries(MULTI_FILE_INPUTS).forEach(([week, ids]) => {
+          pendingFiles[week] = [];
+          const input = document.getElementById(ids.input);
+          const label = document.getElementById(ids.label);
+          const names = document.getElementById(ids.names);
+          if (input) input.value = '';
+          if (label) label.innerText = MULTI_FILE_LABEL;
+          if (names) names.innerText = '';
+        });
       };
 
       // data:image/jpeg;base64,... 에서 실제 파일 형식 추출
@@ -2614,56 +2926,37 @@ function doPost(e) {
         }
       });
 
-      const fileW2 = document.getElementById('file-w2-input');
       // 구글 앱스 스크립트 1회 전송 한도를 고려한 파일당 최대 크기
       const MAX_UPLOAD_MB = 30;
-      fileW2?.addEventListener('change', (e) => {
-        const all = Array.from(e.target.files || []);
-        if (!all.length) return;
-        const tooBig = all.filter(f => f.size > MAX_UPLOAD_MB * 1024 * 1024);
-        const files = all.filter(f => f.size <= MAX_UPLOAD_MB * 1024 * 1024);
-        if (tooBig.length) {
-          showToast(`⚠️ ${tooBig.map(f => f.name).join(', ')} 파일은 ${MAX_UPLOAD_MB}MB가 넘어서 뺐어요. (PDF로 저장하거나 링크로 제출해 주세요)`, false);
-        }
-        if (!files.length) {
-          e.target.value = '';
-          return;
-        }
-        Promise.all(files.map(f => new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => resolve({ name: f.name, data: ev.target.result });
-          reader.onerror = reject;
-          reader.readAsDataURL(f);
-        }))).then(results => {
-          w2FileName = results[0].name;
-          w2FileData = results[0].data;
-          w2ExtraFiles = results.slice(1);
-          const labelW2 = document.getElementById('label-w2-file');
-          const fileW2Name = document.getElementById('file-w2-name');
-          if (labelW2) labelW2.innerText = `파일 ${results.length}개 준비 완료`;
-          if (fileW2Name) fileW2Name.innerText = results.map(r => `📄 ${r.name}`).join('  ');
-          playSound('click');
-        }).catch(() => {
-          showToast('파일을 읽는 중 문제가 생겼어요. 다시 골라 주세요.', false);
-        });
-      });
-
-      const fileW4 = document.getElementById('file-w4-input');
-      fileW4?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          w4PdfName = file.name;
-          const reader = new FileReader();
-          reader.onload = (loadEvt) => {
-            w4PdfData = loadEvt.target.result;
-            const labelW4 = document.getElementById('label-w4-file');
-            const fileW4Name = document.getElementById('file-w4-name');
-            if (labelW4) labelW4.innerText = '최종 PDF 준비 완료';
-            if (fileW4Name) fileW4Name.innerText = `📕 ${file.name}`;
+      Object.entries(MULTI_FILE_INPUTS).forEach(([week, ids]) => {
+        document.getElementById(ids.input)?.addEventListener('change', (e) => {
+          const all = Array.from(e.target.files || []);
+          if (!all.length) return;
+          const tooBig = all.filter(f => f.size > MAX_UPLOAD_MB * 1024 * 1024);
+          const files = all.filter(f => f.size <= MAX_UPLOAD_MB * 1024 * 1024);
+          if (tooBig.length) {
+            showToast(`⚠️ ${tooBig.map(f => f.name).join(', ')} 파일은 ${MAX_UPLOAD_MB}MB가 넘어서 뺐어요. (PDF로 저장하거나 링크로 제출해 주세요)`, false);
+          }
+          if (!files.length) {
+            e.target.value = '';
+            return;
+          }
+          Promise.all(files.map(f => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => resolve({ name: f.name, data: ev.target.result });
+            reader.onerror = reject;
+            reader.readAsDataURL(f);
+          }))).then(results => {
+            pendingFiles[week] = results;
+            const label = document.getElementById(ids.label);
+            const names = document.getElementById(ids.names);
+            if (label) label.innerText = `파일 ${results.length}개 준비 완료`;
+            if (names) names.innerText = results.map(r => `📄 ${r.name}`).join('  ');
             playSound('click');
-          };
-          reader.readAsDataURL(file);
-        }
+          }).catch(() => {
+            showToast('파일을 읽는 중 문제가 생겼어요. 다시 골라 주세요.', false);
+          });
+        });
       });
 
       document.getElementById('btn-submit-weekly')?.addEventListener('click', async () => {
@@ -2689,12 +2982,15 @@ function doPost(e) {
 
         // 빈 제출 방지 (아무것도 적지 않고 누르면 안내)
         const val = (id) => document.getElementById(id)?.value.trim() || '';
+        s.submissions = s.submissions || {};
         const prevSub = s.submissions[week] || {};
-        const hasContent = week === 'week-1'
-          ? Boolean(val('input-w1-intro') || w1FileData || prevSub.fileData)
-          : week === 'week-2'
-            ? Boolean(val('input-w2-summary') || val('input-w2-link') || w2FileData || prevSub.fileData)
-            : Boolean(val('input-w4-line') || val('input-w4-link') || w4PdfData || prevSub.pdfData);
+        const newFiles = pendingFiles[week] || [];
+        const hasContent = {
+          'week-1': () => Boolean(val('input-w1-intro') || w1FileData || prevSub.fileData),
+          'week-2': () => Boolean(val('input-w2-summary') || val('input-w2-link') || newFiles.length || prevSub.fileData),
+          'week-3': () => Boolean(getRevisionLines().length || val('input-w3-link') || newFiles.length || prevSub.fileData),
+          'week-4': () => Boolean(val('input-book-title') || val('input-w4-line') || val('input-w4-link') || newFiles.length || prevSub.pdfData)
+        }[week]?.() || false;
         if (!hasContent) {
           playSound('click');
           showToast('✏️ 먼저 내용을 적거나 파일을 넣어주세요!', false);
@@ -2705,7 +3001,8 @@ function doPost(e) {
           seat: currentSeat,
           studentName: studentName,
           week: week,
-          weekLabel: week === 'week-1' ? '1주차_주인공캐릭터' : (week === 'week-2' ? '2-3주차_동화초안' : '4-5주차_최종동화책'),
+          // 2주차 폴더 이름은 이미 저장된 파일과 같은 폴더에 모이도록 기존 이름 유지
+          weekLabel: { 'week-1': '1주차_주인공캐릭터', 'week-2': '2-3주차_동화초안', 'week-3': '3주차_고친동화', 'week-4': '4-5주차_최종동화책' }[week],
           note: '',
           linkUrl: '',
           fileName: '',
@@ -2726,38 +3023,64 @@ function doPost(e) {
           gdrivePayload.fileBase64 = s.submissions['week-1'].fileData;
           gdrivePayload.mimeType = mimeFromDataUrl(gdrivePayload.fileBase64, 'image/png');
         } else if (week === 'week-2') {
-          const summary = document.getElementById('input-w2-summary')?.value.trim() || '';
-          const linkUrl = document.getElementById('input-w2-link')?.value.trim() || '';
+          const summary = val('input-w2-summary');
+          const linkUrl = val('input-w2-link');
           s.submissions['week-2'] = {
             summary: summary,
             linkUrl: linkUrl,
-            fileData: w2FileData || s.submissions['week-2'].fileData,
-            fileName: w2FileName || s.submissions['week-2'].fileName,
-            fileNames: w2FileName
-              ? [w2FileName, ...w2ExtraFiles.map(f => f.name)]
-              : (s.submissions['week-2'].fileNames || []),
+            fileData: newFiles[0]?.data || prevSub.fileData || '',
+            fileName: newFiles[0]?.name || prevSub.fileName || '',
+            fileNames: newFiles.length ? newFiles.map(f => f.name) : (prevSub.fileNames || []),
             timestamp: Date.now()
           };
           gdrivePayload.note = summary;
           gdrivePayload.linkUrl = linkUrl;
-          gdrivePayload.fileName = s.submissions['week-2'].fileName || '동화초안.pdf';
-          gdrivePayload.fileBase64 = s.submissions['week-2'].fileData;
-          gdrivePayload.mimeType = mimeFromDataUrl(gdrivePayload.fileBase64, 'application/pdf');
-        } else {
-          const recitationLine = document.getElementById('input-w4-line')?.value.trim() || '';
-          const linkUrl = document.getElementById('input-w4-link')?.value.trim() || '';
-          s.submissions['week-4'] = {
-            recitationLine: recitationLine,
+        } else if (week === 'week-3') {
+          const revisionNotes = getRevisionLines().join('\n');
+          const choice = document.getElementById('input-w3-choice')?.value || '';
+          const linkUrl = val('input-w3-link');
+          s.submissions['week-3'] = {
+            revisionNotes: revisionNotes,
+            choice: choice,
             linkUrl: linkUrl,
-            pdfData: w4PdfData || s.submissions['week-4'].pdfData,
-            pdfName: w4PdfName || s.submissions['week-4'].pdfName,
+            fileData: newFiles[0]?.data || prevSub.fileData || '',
+            fileName: newFiles[0]?.name || prevSub.fileName || '',
+            fileNames: newFiles.length ? newFiles.map(f => f.name) : (prevSub.fileNames || []),
             timestamp: Date.now()
           };
-          gdrivePayload.note = recitationLine;
+          const choiceText = { after: '고친 뒤가 더 좋아요', before: '고치기 전이 더 좋아요', both: '둘 다 좋아요' }[choice] || '';
+          gdrivePayload.note = [
+            revisionNotes ? `[고칠 말]\n${revisionNotes}` : '',
+            choiceText ? `[비교해 보니] ${choiceText}` : ''
+          ].filter(Boolean).join('\n\n');
           gdrivePayload.linkUrl = linkUrl;
-          gdrivePayload.fileName = s.submissions['week-4'].pdfName || '최종동화책.pdf';
-          gdrivePayload.fileBase64 = s.submissions['week-4'].pdfData;
-          gdrivePayload.mimeType = 'application/pdf';
+        } else {
+          const title = val('input-book-title');
+          const recitationLine = val('input-w4-line');
+          const linkUrl = val('input-w4-link');
+          const checklist = { ...(s.coverChecklist || {}) };
+          s.submissions['week-4'] = {
+            title: title,
+            checklist: checklist,
+            recitationLine: recitationLine,
+            linkUrl: linkUrl,
+            pdfData: newFiles[0]?.data || prevSub.pdfData || '',
+            pdfName: newFiles[0]?.name || prevSub.pdfName || '',
+            fileNames: newFiles.length ? newFiles.map(f => f.name) : (prevSub.fileNames || []),
+            timestamp: Date.now()
+          };
+          gdrivePayload.note = [
+            title ? `[동화책 제목] ${title}` : '',
+            recitationLine ? `[낭독 문장] ${recitationLine}` : ''
+          ].filter(Boolean).join('\n');
+          gdrivePayload.linkUrl = linkUrl;
+        }
+
+        // 2·3·4주차: 이번에 새로 고른 파일만 드라이브로 보냄 (같은 파일 중복 저장 방지)
+        if (week !== 'week-1' && newFiles.length) {
+          gdrivePayload.fileName = newFiles[0].name;
+          gdrivePayload.fileBase64 = newFiles[0].data;
+          gdrivePayload.mimeType = mimeFromDataUrl(newFiles[0].data, 'application/octet-stream');
         }
 
         s.status = 'done';
@@ -2765,9 +3088,8 @@ function doPost(e) {
         renderWeeklySubmissionUI(week);
         playSound('magic');
 
-        // 2주차 추가 파일은 이번에 새로 고른 경우에만 함께 전송
-        const extraUploads = (week === 'week-2' && w2FileName) ? w2ExtraFiles.slice() : [];
-        const totalFiles = 1 + extraUploads.length;
+        const extraUploads = week !== 'week-1' ? newFiles.slice(1) : [];
+        const totalFiles = (gdrivePayload.fileBase64 ? 1 : 0) + extraUploads.length;
         if (totalFiles > 1 || (gdrivePayload.fileBase64 || '').length > 3 * 1024 * 1024) {
           showToast(`⏳ 파일 ${totalFiles}개를 선생님 드라이브로 보내는 중이에요. 잠시만 기다려 주세요!`);
         }
@@ -2775,7 +3097,10 @@ function doPost(e) {
         isSubmitting = true;
         let uploadRes;
         try {
-          uploadRes = await uploadToGoogleDrive(gdrivePayload);
+          // 새 파일·글·링크가 하나도 없으면(예전 파일만 있음) 드라이브에 다시 보내지 않음
+          uploadRes = (gdrivePayload.fileBase64 || gdrivePayload.note || gdrivePayload.linkUrl)
+            ? await uploadToGoogleDrive(gdrivePayload)
+            : { success: true };
           if (uploadRes && !uploadRes.closed && !uploadRes.skipped) {
             for (const f of extraUploads) {
               await uploadToGoogleDrive({
@@ -2791,12 +3116,18 @@ function doPost(e) {
         } finally {
           isSubmitting = false;
         }
+        if (week !== 'week-1') {
+          pendingFiles[week] = [];
+          const ids = MULTI_FILE_INPUTS[week];
+          const input = document.getElementById(ids.input);
+          if (input) input.value = '';
+        }
         if (uploadRes && uploadRes.closed) {
           showToast('🔒 과제 접수가 마감되어 드라이브에 저장되지 않았습니다.', false);
           return;
         }
 
-        const weekLabelKr = week === 'week-1' ? '1주차 캐릭터' : (week === 'week-2' ? '2~3주차 동화 초안' : '4~5주차 최종 동화책');
+        const weekLabelKr = { 'week-1': '1주차 캐릭터', 'week-2': '2주차 동화 초안', 'week-3': '3주차 고친 동화', 'week-4': '4~5주차 완성 동화책' }[week];
         if (uploadRes && uploadRes.skipped) {
           showToast(`✨ ${weekLabelKr} 과제가 저장되었습니다! (구글 드라이브는 아직 연동되지 않았어요)`);
         } else {
