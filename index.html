@@ -493,10 +493,10 @@
               <label class="block text-xs font-bold text-slate-600 mb-1">방법 B: 동화책 초안 파일 (PDF 또는 캡처 이미지)</label>
               <label class="cursor-pointer flex flex-col items-center justify-center p-2.5 border-2 border-dashed border-indigo-200 hover:border-indigo-400 rounded-2xl bg-indigo-50/40 hover:bg-indigo-50 transition text-indigo-700">
                 <i class="fa-solid fa-file-pdf text-lg mb-0.5 text-indigo-500"></i>
-                <span class="text-xs font-bold" id="label-w2-file">PDF 또는 대표 이미지 선택</span>
-                <input id="file-w2-input" type="file" accept=".pdf,image/*" class="hidden" />
+                <span class="text-xs font-bold" id="label-w2-file">파일 선택 (여러 개 가능: PPT·PDF·이미지)</span>
+                <input id="file-w2-input" type="file" multiple accept=".pdf,.ppt,.pptx,image/*,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" class="hidden" />
               </label>
-              <span id="file-w2-name" class="text-[11px] text-indigo-600 font-bold truncate mt-1 block"></span>
+              <span id="file-w2-name" class="text-[11px] text-indigo-600 font-bold mt-1 block break-all"></span>
             </div>
           </div>
         </div>
@@ -1936,8 +1936,12 @@ function doPost(e) {
             if (sub['week-2'].fileData.startsWith('data:image/')) {
               extra += `<img src="${sub['week-2'].fileData}" alt="초안 삽화" class="w-full h-24 object-cover rounded-xl border border-emerald-200 mt-1" />`;
             } else {
-              extra += `<a href="${sub['week-2'].fileData}" download="${sub['week-2'].fileName || '동화초안.pdf'}" class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-100/60 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-file-pdf"></i> 초안 PDF 다운로드</a>`;
+              extra += `<a href="${sub['week-2'].fileData}" download="${sub['week-2'].fileName || '동화초안.pdf'}" class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-100/60 px-2 py-1 rounded-lg mt-1"><i class="fa-solid fa-file-arrow-down"></i> ${sub['week-2'].fileName || '초안 파일'} 다운로드</a>`;
             }
+          }
+          const w2Names = sub['week-2'].fileNames || [];
+          if (w2Names.length > 1) {
+            extra += `<p class="text-[10px] text-slate-500 mt-1">📎 제출 파일 ${w2Names.length}개: ${w2Names.join(', ')}</p>`;
           }
           w2El.innerHTML = `
             <p class="font-medium text-slate-800 line-clamp-3">${sub['week-2'].summary || '줄거리 요약 없음'}</p>
@@ -2559,11 +2563,13 @@ function doPost(e) {
 
       let w1FileData = '', w1FileName = '';
       let w2FileData = '', w2FileName = '';
+      let w2ExtraFiles = []; // 2주차 두 번째 이후 파일들 [{ name, data }]
+      let isSubmitting = false;
       let w4PdfData = '', w4PdfName = '';
 
       clearPendingFileSelections = () => {
         w1FileData = ''; w1FileName = '';
-        w2FileData = ''; w2FileName = '';
+        w2FileData = ''; w2FileName = ''; w2ExtraFiles = [];
         w4PdfData = ''; w4PdfName = '';
         ['file-w1-input', 'file-w2-input', 'file-w4-input'].forEach(id => {
           const el = document.getElementById(id);
@@ -2574,7 +2580,7 @@ function doPost(e) {
         const labelW2 = document.getElementById('label-w2-file');
         const labelW4 = document.getElementById('label-w4-file');
         if (labelW1) labelW1.innerText = '주인공 이미지 파일 선택하기';
-        if (labelW2) labelW2.innerText = 'PDF 또는 대표 이미지 선택';
+        if (labelW2) labelW2.innerText = '파일 선택 (여러 개 가능: PPT·PDF·이미지)';
         if (labelW4) labelW4.innerText = '최종 동화책 PDF 파일 올리기';
         const nameW2 = document.getElementById('file-w2-name');
         const nameW4 = document.getElementById('file-w4-name');
@@ -2609,21 +2615,37 @@ function doPost(e) {
       });
 
       const fileW2 = document.getElementById('file-w2-input');
+      // 구글 앱스 스크립트 1회 전송 한도를 고려한 파일당 최대 크기
+      const MAX_UPLOAD_MB = 30;
       fileW2?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          w2FileName = file.name;
-          const reader = new FileReader();
-          reader.onload = (loadEvt) => {
-            w2FileData = loadEvt.target.result;
-            const labelW2 = document.getElementById('label-w2-file');
-            const fileW2Name = document.getElementById('file-w2-name');
-            if (labelW2) labelW2.innerText = '파일 준비 완료';
-            if (fileW2Name) fileW2Name.innerText = `📄 ${file.name}`;
-            playSound('click');
-          };
-          reader.readAsDataURL(file);
+        const all = Array.from(e.target.files || []);
+        if (!all.length) return;
+        const tooBig = all.filter(f => f.size > MAX_UPLOAD_MB * 1024 * 1024);
+        const files = all.filter(f => f.size <= MAX_UPLOAD_MB * 1024 * 1024);
+        if (tooBig.length) {
+          showToast(`⚠️ ${tooBig.map(f => f.name).join(', ')} 파일은 ${MAX_UPLOAD_MB}MB가 넘어서 뺐어요. (PDF로 저장하거나 링크로 제출해 주세요)`, false);
         }
+        if (!files.length) {
+          e.target.value = '';
+          return;
+        }
+        Promise.all(files.map(f => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => resolve({ name: f.name, data: ev.target.result });
+          reader.onerror = reject;
+          reader.readAsDataURL(f);
+        }))).then(results => {
+          w2FileName = results[0].name;
+          w2FileData = results[0].data;
+          w2ExtraFiles = results.slice(1);
+          const labelW2 = document.getElementById('label-w2-file');
+          const fileW2Name = document.getElementById('file-w2-name');
+          if (labelW2) labelW2.innerText = `파일 ${results.length}개 준비 완료`;
+          if (fileW2Name) fileW2Name.innerText = results.map(r => `📄 ${r.name}`).join('  ');
+          playSound('click');
+        }).catch(() => {
+          showToast('파일을 읽는 중 문제가 생겼어요. 다시 골라 주세요.', false);
+        });
       });
 
       const fileW4 = document.getElementById('file-w4-input');
@@ -2645,6 +2667,10 @@ function doPost(e) {
       });
 
       document.getElementById('btn-submit-weekly')?.addEventListener('click', async () => {
+        if (isSubmitting) {
+          showToast('⏳ 지금 보내는 중이에요. 잠시만 기다려 주세요!', false);
+          return;
+        }
         if (!isDriveShutterActive) {
           playSound('click');
           showToast('🔒 지금은 선생님께서 과제 수신을 마감하셨습니다. (선생님께 확인해주세요)', false);
@@ -2707,6 +2733,9 @@ function doPost(e) {
             linkUrl: linkUrl,
             fileData: w2FileData || s.submissions['week-2'].fileData,
             fileName: w2FileName || s.submissions['week-2'].fileName,
+            fileNames: w2FileName
+              ? [w2FileName, ...w2ExtraFiles.map(f => f.name)]
+              : (s.submissions['week-2'].fileNames || []),
             timestamp: Date.now()
           };
           gdrivePayload.note = summary;
@@ -2736,7 +2765,32 @@ function doPost(e) {
         renderWeeklySubmissionUI(week);
         playSound('magic');
 
-        const uploadRes = await uploadToGoogleDrive(gdrivePayload);
+        // 2주차 추가 파일은 이번에 새로 고른 경우에만 함께 전송
+        const extraUploads = (week === 'week-2' && w2FileName) ? w2ExtraFiles.slice() : [];
+        const totalFiles = 1 + extraUploads.length;
+        if (totalFiles > 1 || (gdrivePayload.fileBase64 || '').length > 3 * 1024 * 1024) {
+          showToast(`⏳ 파일 ${totalFiles}개를 선생님 드라이브로 보내는 중이에요. 잠시만 기다려 주세요!`);
+        }
+
+        isSubmitting = true;
+        let uploadRes;
+        try {
+          uploadRes = await uploadToGoogleDrive(gdrivePayload);
+          if (uploadRes && !uploadRes.closed && !uploadRes.skipped) {
+            for (const f of extraUploads) {
+              await uploadToGoogleDrive({
+                ...gdrivePayload,
+                note: '',
+                linkUrl: '',
+                fileName: f.name,
+                fileBase64: f.data,
+                mimeType: mimeFromDataUrl(f.data, 'application/octet-stream')
+              });
+            }
+          }
+        } finally {
+          isSubmitting = false;
+        }
         if (uploadRes && uploadRes.closed) {
           showToast('🔒 과제 접수가 마감되어 드라이브에 저장되지 않았습니다.', false);
           return;
